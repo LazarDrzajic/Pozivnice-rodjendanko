@@ -1,0 +1,633 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Дај кош!</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<style>
+/* Layout: one portrait 2:3 pixel stage centred on a navy page; every screen is a DOM overlay above the canvas.
+   Single deliberate arcade look, so no light/dark switching: colours below are fixed. */
+:root{color-scheme:dark;--bg:#0a0f24;--panel:#121b3d;--ink:#f4f1de;--gold:#ffd23f;--red:#e63946;--dim:#9aa6d4;--line:#4a5aa0;--px:"Press Start 2P","Courier New",monospace}
+[hidden]{display:none!important}
+html,body{box-sizing:border-box;height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--px);display:flex;align-items:center;justify-content:center;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.stage{position:relative;width:min(100%,520px,calc(66vh - 20px));width:min(100%,520px,calc(66dvh - 20px));aspect-ratio:2/3;container-type:inline-size;outline:3px solid #2a3566;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow:hidden}
+.stage>*{--u:.5556cqw}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;touch-action:none;background:#161d3f}
+.hud{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*3);padding:calc(var(--u)*3) calc(var(--u)*5);background:rgba(10,15,36,.8);color:var(--gold);font-size:calc(var(--u)*5);pointer-events:none}
+.pips{display:flex;gap:calc(var(--u)*2)}
+.hud button{pointer-events:auto;font:inherit;font-size:calc(var(--u)*3.6);color:var(--gold);background:none;border:calc(var(--u)*.8) solid var(--gold);min-height:36px;padding:0 calc(var(--u)*2);cursor:pointer}
+.hud button:focus-visible{outline:3px solid #fff}
+.pip{width:calc(var(--u)*6);height:calc(var(--u)*6);background:#2a3566;border:calc(var(--u)*1) solid #0a0f24}
+.pip.g{background:#2fbf71}.pip.m{background:var(--red)}
+.hint{position:absolute;left:0;right:0;bottom:0;padding:calc(var(--u)*3) calc(var(--u)*5);background:rgba(10,15,36,.82);color:var(--gold);text-align:center;font-size:calc(var(--u)*4.4);line-height:1.6;pointer-events:none}
+.banner{position:absolute;left:0;right:0;top:36%;text-align:center;font-size:calc(var(--u)*15);line-height:1.2;text-shadow:calc(var(--u)*1.5) calc(var(--u)*1.5) 0 #000;pointer-events:none}
+.banner.pop{animation:pop .35s steps(4) both}
+@keyframes pop{from{transform:scale(.4)}to{transform:scale(1)}}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:calc(var(--u)*5);padding:calc(var(--u)*8);background:rgba(8,12,32,.9);text-align:center;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.h1{margin:0;font-size:calc(var(--u)*11);line-height:1.3;color:var(--gold);text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 #7a1020}
+.tx{margin:0;font-size:calc(var(--u)*5);line-height:1.7}
+.dim{color:var(--dim)}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:calc(var(--u)*3);width:100%;text-align:left}
+.steps li{display:flex;gap:calc(var(--u)*3);align-items:center;font-size:calc(var(--u)*4.6);line-height:1.6}
+.steps b{flex:none;width:calc(var(--u)*9);height:calc(var(--u)*9);display:grid;place-items:center;background:var(--gold);color:#1a1200;font-weight:400;font-size:calc(var(--u)*5)}
+.nm{font-size:calc(var(--u)*4.4);color:var(--gold);line-height:1.6;max-width:92%}
+.inp{font:inherit;font-size:calc(var(--u)*6);text-transform:uppercase;text-align:center;color:var(--ink);background:#0a0f24;border:calc(var(--u)*1) solid #4a5aa0;border-radius:0;padding:calc(var(--u)*3);width:70%;min-height:44px;caret-color:var(--gold)}
+.inp::placeholder{color:#4a5aa0;text-transform:none}
+.inp:focus{outline:3px solid var(--gold);outline-offset:2px}
+.nm{margin:0}
+#sStart{justify-content:flex-start;padding:calc(var(--u)*6) calc(var(--u)*8) calc(var(--u)*6);gap:calc(var(--u)*4.4)}
+#sStart .h1{font-size:calc(var(--u)*11)}
+#sStart .tx{line-height:1.6}
+#sStart .inp{box-sizing:border-box;width:74%;min-height:0;padding:calc(var(--u)*3.6)}   /* name field and jersey row share one width */
+#sStart .btn{padding:calc(var(--u)*4) calc(var(--u)*7)}
+/* jersey row: same width as the name field, colours (3 x 2) on the left half, shirt number on the right half */
+.jr{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;gap:calc(var(--u)*3.5);width:74%}
+#sStart .inp.num{width:100%;height:auto;min-width:0;padding:0 0 0 calc(var(--u)*.75);font-size:calc(var(--u)*5.2)}   /* typed digits and the hint share one size */
+.sw{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*2.2);min-width:0}
+.swb{width:100%;aspect-ratio:1;min-width:0;padding:0;border:calc(var(--u)*1) solid rgba(244,241,222,.55);border-radius:0;cursor:pointer}
+.swb[aria-pressed="true"]{border-color:var(--gold);outline:calc(var(--u)*1.5) solid var(--gold);outline-offset:calc(var(--u)*.5)}
+.swb:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.btn{font:inherit;font-size:calc(var(--u)*6.5);color:#1a1200;background:var(--gold);border:0;min-height:44px;padding:calc(var(--u)*4) calc(var(--u)*7);box-shadow:0 calc(var(--u)*2) 0 #a97c00;cursor:pointer}
+.btn:active{transform:translateY(calc(var(--u)*1.5));box-shadow:0 calc(var(--u)*.5) 0 #a97c00}
+.btn.alt{background:var(--ink);box-shadow:0 calc(var(--u)*2) 0 #8a8672}
+.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.row{display:flex;flex-wrap:wrap;gap:calc(var(--u)*4);justify-content:center}
+.h1.sm{font-size:calc(var(--u)*8.5);line-height:1.5}
+#sTicket{background:rgba(6,9,24,.97);user-select:text;-webkit-user-select:text}
+.tk{font-size:calc(var(--u)*9);color:var(--gold);margin:0;line-height:1.3;text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 #7a1020}
+/* ticket: solid outer frame, dashed tear line, main part (details) + narrow side part (rotated greeting) */
+.ticket{position:relative;display:grid;grid-template-columns:1fr calc(var(--u)*22);width:100%;overflow:hidden;background:var(--panel);border:calc(var(--u)*1.6) solid var(--line);text-align:center}
+.ticket.spin{animation:tspin .95s steps(16,end) both}
+@keyframes tspin{from{transform:perspective(900px) rotateY(0deg) scale(.15)}to{transform:perspective(900px) rotateY(720deg) scale(1)}}
+.tk-ball{position:absolute;left:calc(var(--u)*-11);top:calc(var(--u)*-11);width:calc(var(--u)*56);height:calc(var(--u)*56);image-rendering:pixelated;z-index:0;pointer-events:none}
+.tk-main{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*4.5);padding:calc(var(--u)*6) calc(var(--u)*4)}
+.tk-main .tk{margin-bottom:calc(var(--u)*1)}
+.tg{display:grid;gap:calc(var(--u)*1.6);justify-items:center}
+.tl{color:var(--gold);font-size:calc(var(--u)*4);line-height:1.4}
+.tv{font-size:calc(var(--u)*4.6);line-height:1.5}
+.tn{margin:0;font-size:calc(var(--u)*3.6);line-height:1.6;color:var(--dim);text-wrap:balance}
+.tk-side{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;border-left:calc(var(--u)*1.2) dashed var(--line);padding:calc(var(--u)*3) calc(var(--u)*2)}
+.tk-side p{margin:0;writing-mode:vertical-rl;transform:rotate(180deg);font-size:calc(var(--u)*4);line-height:1.7;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.banner.pop,.ticket.spin{animation:none}}
+</style>
+
+<main class="stage" id="stage">
+  <canvas id="cv" width="180" height="270" aria-label="Игра слободних бацања"></canvas>
+  <div class="hud" id="hud" hidden><span id="hShot"></span><span class="pips" id="pips"></span><button id="bMute" type="button">ЗВУК: ДА</button></div>
+  <div class="hint" id="hint" hidden></div>
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="screen" id="sSplash"></section>
+
+  <section class="screen" id="sStart" hidden>
+    <h1 class="h1">ДАЈ КОШ!</h1>
+    <p class="tx dim">Последња је секунда, губимо,<br>можеш ли да донесеш преокрет?</p>
+    <ol class="steps">
+      <li><b>1</b><span>ДОДИРНИ И ДРЖИ ЛОПТУ</span></li>
+      <li><b>2</b><span>НАЦИЉАЈ СРЕДИНУ ОБРУЧА</span></li>
+      <li><b>3</b><span>ПУСТИ ПРСТ И УПУТИ ШУТ!</span></li>
+    </ol>
+    <p class="tx dim">Имаш два слободна бацања,<br>мораш да погодиш оба за победу!</p>
+    <label class="nm" for="iName">Ако желиш, унеси своје име или надимак (до 5 слова):</label>
+    <input class="inp" id="iName" type="text" maxlength="12" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="нпр. МАРКО">
+    <p class="tx dim" id="nPrev" hidden></p>
+    <label class="nm" id="lJersey" for="iNum">Можеш да подесиш боју и број на дресу:</label>
+    <div class="jr" role="group" aria-labelledby="lJersey">
+      <div class="sw" id="sw" role="group" aria-label="Боја дреса">
+        <button class="swb" type="button" data-c="#e63946" aria-label="Црвена" aria-pressed="true" style="background:#e63946"></button>
+        <button class="swb" type="button" data-c="#2f6fdb" aria-label="Плава" aria-pressed="false" style="background:#2f6fdb"></button>
+        <button class="swb" type="button" data-c="#1b1b24" aria-label="Црна" aria-pressed="false" style="background:#1b1b24"></button>
+        <button class="swb" type="button" data-c="#25a05a" aria-label="Зелена" aria-pressed="false" style="background:#25a05a"></button>
+        <button class="swb" type="button" data-c="#9b5de5" aria-label="Љубичаста" aria-pressed="false" style="background:#9b5de5"></button>
+        <button class="swb" type="button" data-c="#7d8597" aria-label="Сива" aria-pressed="false" style="background:#7d8597"></button>
+      </div>
+      <input class="inp num" id="iNum" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="нпр. 10" aria-label="Број на дресу">
+    </div>
+    <button class="btn" id="bStart" type="button">ПОКРЕНИ ИГРУ</button>
+  </section>
+
+  <section class="screen" id="sWin" hidden></section>
+
+  <section class="screen" id="sTicket" hidden></section>
+
+  <section class="screen" id="sLose" hidden>
+    <h2 class="h1">УХ, ЗАМАЛО!</h2>
+    <p class="tx">Лопта није хтела у кош.<br> Покушај поново!</p>
+    <button class="btn" id="bAgainL" type="button">ИГРАЈ ПОНОВО</button>
+  </section>
+</main>
+
+<script>
+// Измени ове податке за своју позивницу.
+const CFG={
+  name:"Лука", nameOf:"Лукин", age:7, jerseyNo:7,   // jerseyNo: default shirt number
+  ticketGreeting:"ЛУКА СЛАВИ 7. РОЂЕНДАН!",            // text on the side of the ticket, shown exactly as written
+  date:"Субота, 14. новембар, 2026.", time:"16:00 - 20:00", place:"Балон Бубамара, Улцињска 25",
+  phone:"06х ххх ххх",
+  note:"Потврди свој долазак на 064/1133 55 44",
+  shirt:"#e63946", shots:2,
+  scoreHome:79, scoreAway:80, clock:"00:01"            // scoreboard above the backboard: home and guest score, clock as MM:SS
+};
+
+(()=>{
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+// BX,BY: ball held over the head; RY: height where the ball leaves the fingertips; RIMX,RIMY: centre of the rim; BASE: baseline of the court; FT: free-throw line (the shooter stands on it)
+const W=180,H=270,BX=90,BY=207,RY=196,FLY=.8,KW=.34,N=CFG.shots,RIMX=90,RIMY=100,BASE=132,FT=260;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rnd=(a,b)=>a+Math.random()*(b-a),ease=p=>1-(1-p)*(1-p);
+let G=ctx;   // drawing target: the visible canvas, or the court layer while it is pre-rendered
+const R=(x,y,w,h,c)=>{G.fillStyle=c;G.fillRect(Math.round(x),Math.round(y),w,h)};
+const SKIN='#e0a370',HAIR='#3b2314',LINE='#f6f1e3';
+const shade=(h,f)=>{const v=parseInt(h.slice(1),16),c=k=>Math.round(((v>>k)&255)*f);return'rgb('+c(16)+','+c(8)+','+c(0)+')'};
+
+// sprites
+const BSZ=13,bs=document.createElement('canvas');bs.width=bs.height=BSZ;
+// basketball drawn pixel by pixel: dark outline, centre cross, two side seams bulging toward the middle, lit upper left and shaded lower right
+{const g=bs.getContext('2d'),C=6,K=9;
+ for(let y=0;y<BSZ;y++)for(let x=0;x<BSZ;x++){
+  const dx=x-C,dy=y-C,r=Math.hypot(dx,dy);if(r>6.3)continue;
+  let c;
+  if(r>=5.4||Math.abs(dx)<.6||Math.abs(dy)<.6||Math.abs(Math.hypot(dx+K,dy)-6)<.55||Math.abs(Math.hypot(dx-K,dy)-6)<.55)c='#2a1405';
+  else c=dx+dy>3.2?'#c4620f':(dx+dy<-4?'#ff9d3d':'#e8761c');
+  g.fillStyle=c;g.fillRect(x,y,1,1);
+ }}
+
+const DIG={0:'111101101101111',1:'010110010010111',2:'111001111100111',3:'111001111001111',4:'101101111001001',5:'111100111001111',6:'111100111101111',7:'111001001001001',8:'111101111101111',9:'111101111001111'};
+function drawNum(n,cx,y,s,col){const t=String(n),w=(t.length*4-1)*s;let x=cx-w/2;
+ for(const ch of t){const b=DIG[ch];for(let i=0;i<15;i++)if(b[i]==='1')R(x+(i%3)*s,y+Math.floor(i/3)*s,s,s,col);x+=4*s}}
+// 3x5 pixel letters for the jersey name (Serbian Cyrillic); Latin input is transliterated first
+const G3={'А':'010101111101101','Б':'111100110101110','В':'110101110101110','Г':'111100100100100','Д':'011101101111101','Ђ':'110010111101001','Е':'111100110100111','Ж':'101010111010101','З':'110001010001110','К':'101101110101101','Л':'011101101101101','М':'101111111101101','Н':'101101111101101','О':'010101101101010','П':'111101101101101','Р':'110101110100100','С':'011100100100011','Т':'111010010010010','Ћ':'110010111101101','У':'101101011001110','Ф':'010111101111010','Х':'101101010101101','Ч':'101101111001001','Ш':'101101101101111','Ј':'001001001101010'};
+const GLY={};for(const k in G3){const r=[];for(let i=0;i<5;i++)r.push(G3[k].slice(i*3,i*3+3));GLY[k]=r}
+GLY['Д']=['0111','0101','0101','1111','1001'];
+GLY['И']=['1001','1011','1101','1001','1001'];                          // diagonal rises to the right, so it cannot be confused with Н
+GLY['Ц']=['1010','1010','1010','1111','0001'];
+GLY['Џ']=['1010','1010','1010','1111','0100'];
+GLY['Љ']=['01100','10100','10110','10101','10110'];
+GLY['Њ']=['10100','10100','11110','10101','10110'];
+// Latin letters keep their own look on the jersey: 3x5 pixel glyphs; accents sit in extra rows above (drawName lifts taller glyphs)
+const LAT={A:'010101111101101',B:'110101110101110',C:'011100100100011',D:'110101101101110',E:'111100110100111',F:'111100110100100',G:'011100101101011',H:'101101111101101',I:'111010010010111',J:'001001001101010',K:'101101110101101',L:'100100100100111',M:'101111111101101',O:'010101101101010',P:'110101110100100',Q:'010101101110011',R:'110101110101101',S:'011100010001110',T:'111010010010010',U:'101101101101111',V:'101101101101010',W:'101101111111101',X:'101101010101101',Y:'101101010010010',Z:'111001010100111'};
+for(const k in LAT){const r=[];for(let i=0;i<5;i++)r.push(LAT[k].slice(i*3,i*3+3));GLY[k]=r}
+GLY['N']=['1001','1101','1011','1001','1001'];
+GLY['Đ']=['01110','01001','11101','01001','01110'];
+GLY['Č']=['101','010',...GLY['C']];GLY['Ć']=['001','010',...GLY['C']];GLY['Š']=['101','010',...GLY['S']];GLY['Ž']=['101','010',...GLY['Z']];
+const nw=t=>[...t].reduce((a,c)=>a+GLY[c][0].length+1,-1);
+function toName(v){
+  let out='';
+  for(const ch of v.toUpperCase()){                                                    // Latin stays Latin, Cyrillic stays Cyrillic: no transliteration
+    if(!GLY[ch])continue;
+    if(out.length>=5||nw(out+ch)>22)break;                                               // the jersey is 24px wide
+    out+=ch;
+  }
+  return out;
+}
+function drawName(t,cx,y,col){let x=cx-Math.floor(nw(t)/2);
+  for(const ch of t){const g=GLY[ch],up=g.length-5;g.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='1')R(x+i,y+j-up,1,1,col)});x+=g[0].length+1}}
+const lum=h=>{const v=parseInt(h.slice(1),16);return .3*(v>>16)+.59*((v>>8)&255)+.11*(v&255)};
+
+// crowd
+const skins=['#f1c27d','#e0a370','#c68642','#8d5524','#ffdbac'],tops=['#e63946','#457b9d','#ffd23f','#2a9d8f','#f4f1de','#9b5de5','#fb8500'];
+const hairs=['#2b1a10','#5a3a1e','#111','#c9a227','#8a4b1f'],pick=a=>a[Math.floor(Math.random()*a.length)];
+const crowd=[];for(let r=0;r<10;r++)for(let c=-1;c<31;c++)crowd.push({r,x:c*6+(r%2?3:0),y:3+r*7,s:pick(skins),h:pick(hairs),sh:pick(tops),p:Math.random()*6.28});
+// five fans wave big checkered flags in the player's jersey colour, swinging the pole left and right
+const holders=[];
+for(let i=0;i<5;i++){
+  const tx=26+i*32+rnd(-3,3),row=5+Math.floor(Math.random()*4);let best=null;
+  for(const c of crowd)if(c.r===row&&!c.flag&&(!best||Math.abs(c.x-tx)<Math.abs(best.x-tx)))best=c;
+  best.flag={ph:Math.random()*6.28,w:rnd(.85,1.15)};holders.push(best);
+}
+const ADS=['#e63946','#f4f1de','#457b9d','#ffd23f','#2a9d8f','#fb8500'];
+
+// the lane (key) gets wider toward the camera: LANE0 = half width at the baseline, LANE1 = at the free-throw line
+const LANE0=28,LANE1=32,hwAt=y=>LANE0+(y-BASE)/(FT-BASE)*(LANE1-LANE0);
+// free-throw lineup: the two lane spaces nearest the basket on each side of the key, four players in all; the first row is the opponents, the second row the shooter's team.
+// They stand in profile and face each other across the key. Hair is dark so the heads stay readable against the wood.
+const darkHair=['#15110d','#241710','#3b2314','#0f0f12'],npcs=[];
+[3,11].forEach((t,i)=>[-1,1].forEach(side=>{
+  const y=BASE+t*(FT-BASE)/19,sc=hwAt(y)/LANE1*.95;
+  npcs.push({side,y,sc,x:90+side*(hwAt(y)+3+7*sc),team:i%2===0?'B':'A',s:pick(skins),h:pick(darkHair),ox:0,tx:0,nx:rnd(0,1.5),ph:rnd(0,6.28)});
+}));
+npcs.sort((a,b)=>a.y-b.y);   // far players first
+
+
+// state
+let state='intro',T=0,shotT=0,cheer=0,flash=0,shotNo=0,res=[],aim=null,shot=null,resT=0,aimDist=0,kickT=0,frT=0,netT=-9,pName='',pNum=String(CFG.jerseyNo),pShirt=CFG.shirt;
+const ball={x:BX,y:BY,s:13,vx:0,vy:0,g:0},parts=[];
+let home=CFG.scoreHome;                                          // the scoreboard: the home team (the shooter's) gets +1 for every basket
+const oppCol=()=>pShirt==='#2f6fdb'?'#e63946':'#2f6fdb';   // the other team wears a contrasting colour
+
+// the flight is a straight line from the hands to the landing point plus an arc on top; higher arcs for longer shots
+const arcH=ty=>40+Math.max(0,RY-ty)*.12;
+const flightAt=(sx,sy,tx,ty,p)=>({x:sx+(tx-sx)*p,y:sy+(ty-sy)*p-arcH(ty)*Math.sin(Math.PI*p)});
+// where the ball lands (in the plane of the rim) decides the result
+function judge(tx,ty){
+  const dx=Math.abs(tx-RIMX),dy=ty-RIMY;
+  if(dx<=3.5&&Math.abs(dy)<=5)return'swish';                                         // clean shot, nothing but net (the hoop is small, so this is a narrow window)
+  if(dx<=9&&dy>=-8&&dy<=8){const d=Math.max(dx-3.5,Math.abs(dy)-5,0);return Math.random()<.58-d*.07?'rimin':'rimout'}   // rim: closer to the middle rolls in more often
+  if(dx<=17&&ty>=75&&ty<RIMY-8)return(dx<=7&&ty>=82&&Math.random()<.7)?'bank':'board';   // backboard: the square gives a bank shot
+  return'air';
+}
+function shoot(ax,ay){
+  const tx=ax+rnd(-1.5,1.5),ty=ay+rnd(-1.5,1.5),r=judge(tx,ty);
+  shot={tx,ty,res:r,made:r==='swish'||r==='rimin'||r==='bank',pend:0,celT:0,done:false};
+  kickT=T;state='kick';aim=null;$('hint').hidden=true;bed(.16,900,.2);
+}
+function say(t,c){const b=$('banner');b.textContent=t;b.style.color=c;b.hidden=false;b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')}
+// the ball drops through the net: cheer, confetti, net swings
+function dropIn(){
+  shot.celT=T;home++;cheer=3;flash=1;netT=T;ball.vx=0;ball.vy=30;ball.g=260;
+  say(shot.res==='swish'?'ЧИСТ КОШ!':'КОШ!','#ffd23f');swishSfx();roar();
+  for(let i=0;i<46;i++)parts.push({x:rnd(10,170),y:rnd(10,60),vx:rnd(-30,30),vy:rnd(-60,-10),c:tops[i%7]});
+}
+function resolve(){
+  shot.done=true;const r=shot.res,side=shot.tx<RIMX?-1:1;res.push(shot.made);
+  ball.x=shot.tx;ball.y=shot.ty;ball.s=8;ball.vx=ball.vy=ball.g=0;
+  if(r==='swish')dropIn();
+  else if(r==='rimin'){ping();shot.pend=T+.55}                                        // rolls around the rim, then drops in
+  else if(r==='bank'){boardSfx();shot.pend=T+.3}                                      // off the square and in
+  else if(r==='rimout'){ball.vx=side*rnd(28,40);ball.vy=-45;ball.g=200;say('ОБРУЧ!','#fb8500');rimSfx()}
+  else if(r==='board'){ball.vx=side*rnd(8,16);ball.vy=-15;ball.g=190;say('ТАБЛА!','#fb8500');boardSfx();groan()}
+  else{                                                                                // air ball: short drops, wide or long flies on
+    if(shot.ty>RIMY+10){ball.vx=(shot.tx-RIMX)*.4;ball.vy=25;ball.g=150}
+    else if(Math.abs(shot.tx-RIMX)>14){ball.vx=(shot.tx-RIMX)*.9;ball.vy=20;ball.g=140}
+    else{ball.vx=(shot.tx-RIMX)*.9;ball.vy=-35;ball.g=0}
+    say('ПРОМАШАЈ!','#8ecae6');oh();
+  }
+  state='result';resT=T;hud();
+}
+function next(){
+  $('banner').hidden=true;
+  if(!shot.made){state='frustr';frT=T;hud();return}   // one miss and the ticket is out of reach: the player clutches his head, then the loss screen
+  shotNo++;
+  if(shotNo>=N){finish(true);return}                   // every shot went in: the ticket is won
+  shot=null;ball.x=BX;ball.y=BY;ball.s=13;ball.vx=ball.vy=ball.g=0;state='ready';hud();hint();bed(.05,600,.5);
+}
+function finish(win){
+  state='end';if(!win)bed(.03,500,.8);$('hud').hidden=true;$('hint').hidden=true;$(win?'sWin':'sLose').hidden=false;
+}
+function hud(){
+  $('hShot').textContent='БАЦАЊЕ '+Math.min(shotNo+1,N)+'/'+N;
+  $('pips').innerHTML=Array.from({length:N},(_,i)=>'<i class="pip'+(i<res.length?(res[i]?' g':' m'):'')+'"></i>').join('');
+}
+function hint(t){const h=$('hint');h.textContent=t||(shotNo===0?'ДРЖИ ЛОПТУ И ЦИЉАЈ У ОБРУЧ!':'ДРЖИ ЛОПТУ И ЦИЉАЈ У ОБРУЧ!');h.hidden=false}
+function newGame(){
+  shotNo=0;res=[];shot=null;aim=null;home=CFG.scoreHome;parts.length=0;cheer=0;flash=0;netT=-9;
+  ball.x=BX;ball.y=BY;ball.s=13;ball.vx=ball.vy=ball.g=0;
+  ['sSplash','sStart','sWin','sTicket','sLose'].forEach(i=>$(i).hidden=true);$('banner').hidden=true;$('hud').hidden=false;audioInit();bed(.05,600,.5);
+  state='ready';hud();hint();
+}
+// basketball outline in the ticket's line colour: rim, centre cross and the two side seams, panels left empty
+function drawTicketBall(cv){
+  const n=37,g=(cv.width=n,cv.height=n,cv.getContext('2d')),C=(n-1)/2,rad=n/2,col=getComputedStyle(document.documentElement).getPropertyValue('--line').trim()||'#4a5aa0';
+  g.fillStyle=col;
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+    const dx=x-C,dy=y-C,r=Math.hypot(dx,dy);if(r>rad)continue;
+    const k=rad*1.5;
+    if(r>=rad-2.1||Math.abs(dx)<1.1||Math.abs(dy)<1.1||Math.abs(Math.hypot(dx+k,dy)-rad)<1.1||Math.abs(Math.hypot(dx-k,dy)-rad)<1.1)g.fillRect(x,y,1,1);
+  }
+}
+
+
+// ticket download: the ticket is redrawn on a canvas (same layout as the pop-up) and offered as a PNG
+function wrapTxt(g,t,mw){const out=[];let l='';for(const w of t.split(' ')){const n=l?l+' '+w:w;if(l&&g.measureText(n).width>mw){out.push(l);l=w}else l=n}if(l)out.push(l);return out}
+async function ticketPng(){
+  try{await document.fonts.load('12px "Press Start 2P"')}catch(_){}
+  const S=3,TW=360,SW=58,M=14,css=getComputedStyle(document.documentElement),LINE_=css.getPropertyValue('--line').trim()||'#4a5aa0',GOLD=css.getPropertyValue('--gold').trim()||'#ffd23f',INK=css.getPropertyValue('--ink').trim()||'#f4f1de',DIM=css.getPropertyValue('--dim').trim()||'#9aa6d4',PAN=css.getPropertyValue('--panel').trim()||'#121b3d';
+  const F=s=>s+'px "Press Start 2P","Courier New",monospace',mw=TW-SW-28;
+  const m=document.createElement('canvas').getContext('2d');m.font=F(11);
+  const rows=[['ДАТУМ',CFG.date],['ВРЕМЕ',CFG.time],['МЕСТО',CFG.place]].map(r=>({l:r[0],v:(m.font=F(10),wrapTxt(m,r[1],mw))}));
+  m.font=F(9);const note=wrapTxt(m,CFG.note,mw);
+  let h=22+26+16;for(const r of rows)h+=14+r.v.length*18+16;h+=note.length*15+22;h=Math.max(h,270);
+  const cv2=document.createElement('canvas');cv2.width=(TW+2*M)*S;cv2.height=(h+2*M)*S;
+  const g=cv2.getContext('2d');g.scale(S,S);g.imageSmoothingEnabled=false;
+  g.fillStyle='#0a0f24';g.fillRect(0,0,TW+2*M,h+2*M);
+  g.save();g.translate(M,M);
+  g.fillStyle=PAN;g.fillRect(0,0,TW,h);
+  g.save();g.beginPath();g.rect(0,0,TW,h);g.clip();
+  const bc=document.createElement('canvas');drawTicketBall(bc);g.drawImage(bc,-22,-22,104,104);g.restore();
+  g.textAlign='center';g.textBaseline='middle';
+  const cx=(TW-SW)/2;let y=34;
+  g.font=F(24);g.fillStyle='#7a1020';g.fillText('УЛАЗНИЦА',cx+2,y+2);g.fillStyle=GOLD;g.fillText('УЛАЗНИЦА',cx,y);y+=40;
+  for(const r of rows){g.font=F(10);g.fillStyle=GOLD;g.fillText(r.l,cx,y);y+=18;g.font=F(10);g.fillStyle=INK;for(const t of r.v){g.fillText(t,cx,y);y+=18}y+=14}
+  g.font=F(9);g.fillStyle=DIM;y+=2;for(const t of note){g.fillText(t,cx,y);y+=15}
+  g.strokeStyle=LINE_;g.lineWidth=2;g.setLineDash([5,4]);g.beginPath();g.moveTo(TW-SW,0);g.lineTo(TW-SW,h);g.stroke();g.setLineDash([]);
+  g.save();g.translate(TW-SW/2,h/2);g.rotate(-Math.PI/2);g.font=F(11);g.fillStyle=INK;g.fillText(CFG.ticketGreeting,0,0);g.restore();
+  g.lineWidth=4;g.strokeStyle=LINE_;g.strokeRect(2,2,TW-4,h-4);
+  g.restore();
+  return new Promise(res=>cv2.toBlob(res,'image/png'));
+}
+async function saveTicket(){
+  const b=$('bTicketDl'),old=b.textContent;b.disabled=true;
+  try{
+    const blob=await ticketPng();if(!blob)return;const name='ulaznica.png';
+    let d=null;try{d=window.claude&&claude.use?await claude.use('downloads'):null}catch(_){}
+    if(d){try{await d.save({filename:name,data:blob})}catch(e){if(!e||e.code!=='declined'){}}return}   // inside the Claude viewer: the viewer confirms the save
+    const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
+  }catch(_){}finally{b.disabled=false;b.textContent=old}
+}
+function buildScreens(){
+  $('sSplash').innerHTML='<h2 class="h1 sm">'+CFG.name+' те позива на свој '+CFG.age+'. рођендан!</h2>'+
+   '<p class="tx dim">Да би добио/ла улазницу,<br> одиграј једну кратку игрицу!</p>'+
+   '<button class="btn" id="bAccept" type="button">ПРИХВАТАМ</button>';
+  $('sWin').innerHTML='<h2 class="h1">БРАВО!</h2><p class="tx">Успео/ла си да погодиш оба бацања и зато добијаш своју улазницу!</p>'+
+   '<div class="row"><button class="btn" id="bTicket" type="button">ПРИКАЖИ УЛАЗНИЦУ</button><button class="btn alt" id="bAgainW" type="button">ИГРАЈ ПОНОВО</button></div>';
+  $('sTicket').innerHTML='<div class="ticket" id="tkt"><canvas class="tk-ball" id="tkBall" aria-hidden="true"></canvas>'+
+   '<div class="tk-main"><h2 class="tk">УЛАЗНИЦА</h2>'+
+   '<div class="tg"><span class="tl">ДАТУМ</span><span class="tv">'+CFG.date+'</span></div>'+
+   '<div class="tg"><span class="tl">ВРЕМЕ</span><span class="tv">'+CFG.time+'</span></div>'+
+   '<div class="tg"><span class="tl">МЕСТО</span><span class="tv">'+CFG.place+'</span></div>'+
+   '<p class="tn">'+CFG.note+'</p></div>'+
+   '<div class="tk-side"><p>'+CFG.ticketGreeting+'</p></div></div>'+
+   '<button class="btn" id="bTicketDl" type="button">ПРЕУЗМИ</button>'+
+   '<button class="btn alt" id="bTicketX" type="button">ЗАТВОРИ</button>';
+  drawTicketBall($('tkBall'));
+  $('bAccept').onclick=()=>{audioInit();$('sSplash').hidden=true;$('sStart').hidden=false};
+  $('bTicket').onclick=()=>{
+    audioInit();$('sTicket').hidden=false;$('sTicket').scrollTop=0;
+    const t=$('tkt');t.classList.remove('spin');void t.offsetWidth;t.classList.add('spin');   // the ticket spins in
+    roar();                                                                                    // same cheer as after a goal
+  };
+  $('bTicketX').onclick=()=>{$('sTicket').hidden=true};
+  $('bTicketDl').onclick=saveTicket;
+  $('bAgainW').onclick=newGame;
+}
+buildScreens();
+
+// sound: everything is synthesised in the browser, no audio files
+let AC=null,master=null,bedG=null,bp=null,noiseBuf=null,muted=false;
+function audioInit(){
+  try{
+    if(AC){if(AC.state==='suspended')AC.resume();return}
+    const X=window.AudioContext||window.webkitAudioContext;if(!X)return;
+    AC=new X();master=AC.createGain();master.gain.value=muted?0:1;master.connect(AC.destination);
+    const n=AC.sampleRate*2;noiseBuf=AC.createBuffer(1,n,AC.sampleRate);const d=noiseBuf.getChannelData(0);
+    for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
+    const src=AC.createBufferSource();src.buffer=noiseBuf;src.loop=true;
+    bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=600;bp.Q.value=.6;
+    bedG=AC.createGain();bedG.gain.value=0;src.connect(bp);bp.connect(bedG);bedG.connect(master);src.start();
+  }catch(_){AC=null}
+}
+// crowd noise level and tone: low murmur, swelling while the ball is held and in flight
+function bed(lvl,f,tc){if(!AC)return;const t=AC.currentTime;bedG.gain.cancelScheduledValues(t);bp.frequency.cancelScheduledValues(t);bedG.gain.setTargetAtTime(lvl,t,tc||.3);bp.frequency.setTargetAtTime(f,t,tc||.3)}
+function tone(type,f0,f1,dur,vol,delay){if(!AC)return;const t=AC.currentTime+(delay||0),o=AC.createOscillator(),g=AC.createGain();
+  o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur);
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.02)}
+function puff(dur,vol,f,ty){if(!AC)return;const t=AC.currentTime,s=AC.createBufferSource(),b=AC.createBiquadFilter(),g=AC.createGain();
+  s.buffer=noiseBuf;b.type=ty||'lowpass';b.frequency.value=f;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  s.connect(b);b.connect(g);g.connect(master);s.start(t);s.stop(t+dur+.02)}
+const release=()=>{tone('sine',260,420,.1,.2);puff(.14,.22,1800)};
+const thump=()=>tone('sine',130,60,.12,.45);
+const swishSfx=()=>puff(.45,.45,4500,'highpass');
+const boardSfx=()=>{puff(.08,.5,600);tone('sine',180,90,.12,.4)};
+// crowd 'ooh' on a miss: a few detuned voices gliding down through a vowel-like filter, plus a breath of noise
+function oh(){
+  if(!AC)return;const t=AC.currentTime;
+  for(let k=0;k<5;k++){
+    const o=AC.createOscillator(),f=AC.createBiquadFilter(),g=AC.createGain(),b=190+k*34;
+    o.type='sawtooth';o.frequency.setValueAtTime(b*1.3,t);o.frequency.exponentialRampToValueAtTime(b*.75,t+.95);
+    f.type='bandpass';f.frequency.value=560;f.Q.value=3;
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.08,t+.14);g.gain.exponentialRampToValueAtTime(.0001,t+1.05);
+    o.connect(f);f.connect(g);g.connect(master);o.start(t);o.stop(t+1.1);
+  }
+  puff(.7,.07,1600);groan();
+}
+function groan(){bed(.14,330,.1);setTimeout(()=>bed(.05,600,.6),1100)}
+const ping=()=>{tone('triangle',1400,1380,.6,.25);tone('sine',2100,2080,.4,.1)};
+const rimSfx=()=>{ping();groan()};
+function roar(){
+  if(!AC)return;const t=AC.currentTime;bedG.gain.cancelScheduledValues(t);bp.frequency.cancelScheduledValues(t);
+  bedG.gain.setTargetAtTime(.55,t,.08);bedG.gain.setTargetAtTime(.05,t+2.4,.8);
+  bp.frequency.setTargetAtTime(1300,t,.1);bp.frequency.setTargetAtTime(600,t+2.4,.6);
+  [523,659,784,1047].forEach((f,i)=>tone('square',f,f,i<3?.11:.35,.1,.05+i*.11));
+}
+
+// input: hold the ball, drag to the hoop, release to shoot
+const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}};
+cv.addEventListener('pointerdown',e=>{
+  if(state!=='ready')return;const p=pt(e);
+  if(Math.hypot(p.x-BX,p.y-BY)<34){state='aiming';try{cv.setPointerCapture(e.pointerId)}catch(_){}audioInit();bed(.13,750,.5);move(p)}
+});
+// the crosshair is the landing point at the hoop: sideways = left/right, further up = a longer, harder throw
+function move(p){const vx=p.x-BX,vy=BY-p.y;aimDist=Math.hypot(vx,vy);aim={x:clamp(BX+vx,36,144),y:clamp(150-vy*.72,64,150)};
+  const h=$('hint');h.textContent=aimDist<14?'ПОВУЦИ ПРСТ НАГОРЕ!':'ЦИЉАЈ У ОБРУЧ И ПУСТИ!';h.hidden=false}
+cv.addEventListener('pointermove',e=>{if(state==='aiming')move(pt(e))});
+const up=()=>{if(state!=='aiming')return;if(aim&&aimDist>=14)shoot(aim.x,aim.y);else{state='ready';aim=null;hint();bed(.05,600,.4)}};
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',()=>{if(state==='aiming'){state='ready';aim=null;hint();bed(.05,600,.4)}});
+
+$('bStart').onclick=()=>{
+  pName=toName($('iName').value);
+  const d=$('iNum').value;pNum=d===''?String(CFG.jerseyNo):String(parseInt(d,10));   // empty number keeps the default 7
+  newGame();
+};
+// jersey colour: six swatches, red is the default
+document.querySelectorAll('.swb').forEach(b=>b.addEventListener('click',()=>{
+  pShirt=b.dataset.c;document.querySelectorAll('.swb').forEach(o=>o.setAttribute('aria-pressed',String(o===b)));
+}));
+const iNum=$('iNum');
+iNum.addEventListener('input',()=>{iNum.value=iNum.value.replace(/\D/g,'').slice(0,2)});
+iNum.addEventListener('blur',()=>fit());
+iNum.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();iNum.blur();$('bStart').click()}});$('bAgainL').onclick=newGame;
+const iName=$('iName');
+iName.addEventListener('input',()=>{const n=toName(iName.value);const p=$('nPrev');p.textContent=n?'НА ДРЕСУ: '+n:'';p.hidden=!n});
+iName.addEventListener('blur',()=>fit());
+iName.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();iName.blur();$('bStart').click()}});
+$('bMute').onclick=()=>{audioInit();muted=!muted;if(master)master.gain.value=muted?0:1;$('bMute').textContent='ЗВУК: '+(muted?'НЕ':'ДА')};
+
+// update
+function update(dt){
+  T+=dt;if(cheer>0)cheer-=dt;if(flash>0)flash-=dt*1.6;
+  // the other players only shuffle a few pixels left and right at random
+  for(const n of npcs){if(T>=n.nx){n.tx=rnd(-2.5,2.5);n.nx=T+rnd(.5,1.6)}n.ox+=(n.tx-n.ox)*Math.min(1,dt*3)}
+  if(state==='kick'){
+    const kt=T-kickT;                                                  // knees bend, then the arms push the ball up and it leaves the fingertips
+    ball.y=kt<.16?BY+3*(kt/.16):BY+3-(BY+3-RY)*ease(clamp((kt-.16)/(KW-.16),0,1));
+    if(kt>=KW){state='flying';shotT=T;release()}
+  }
+  if(state==='flying'){
+    const el=T-shotT,p=clamp(el/FLY,0,1),b=flightAt(BX,RY,shot.tx,shot.ty,p);
+    ball.x=b.x;ball.y=b.y;ball.s=13-5*p;
+    if(el>=FLY&&!shot.done)resolve();
+  }else if(state==='result'||state==='frustr'){
+    const el=T-resT;
+    if(state==='result'&&shot.pend){
+      if(shot.res==='rimin'){ball.x=RIMX+Math.sin(el*18)*7*(1-el/.55);ball.y=RIMY-1-Math.abs(Math.cos(el*18))*2}   // rolls around the rim
+      else{ball.x+=(RIMX-ball.x)*Math.min(1,dt*9);ball.y+=(RIMY+2-ball.y)*Math.min(1,dt*9)}                       // slides off the square into the hoop
+      if(T>=shot.pend){shot.pend=0;dropIn()}
+    }else{
+      ball.x+=ball.vx*dt;ball.y+=ball.vy*dt;ball.vy+=ball.g*dt;
+      if(shot.made)ball.x+=(RIMX-ball.x)*Math.min(1,dt*8);            // falls straight through the net
+      const fl=shot.made?158:178;
+      if(ball.y>fl&&ball.vy>0){ball.y=fl;if(ball.vy>35){ball.vy*=-.45;thump()}else ball.vy=0;ball.vx*=.6}
+    }
+    if(state==='result'){if(T-resT>(shot.made?(shotNo+1>=N?3:2.2):1.8))next()}
+    else if(T-frT>2.4)finish(false);
+  }
+  for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=120*dt;if(q.y>H)parts.splice(i,1)}
+}
+
+
+// draw: the court is drawn once into its own layer (planks, painted key, lines), everything that moves is drawn on top every frame
+const court=document.createElement('canvas');court.width=W;court.height=H;
+(function buildCourt(){
+  G=court.getContext('2d');
+  const AD=83,SL=3.125,PW=9,TONES=['#d09557','#c98b4e','#c4854a','#d39a5c'];     // SL: sideline = 25 ft against a lane half width of 8 ft
+  const rs=i=>((i*2654435761)>>>0)%1000/1000;
+  for(let i=0,x=0;x<W;i++,x+=PW){                                                  // the floor runs the whole width: wood planks with seams, staggered joints and grain
+    R(x,AD,PW,H-AD,TONES[Math.floor(rs(i+3)*4)]);
+    R(x,AD,1,H-AD,'rgba(90,50,20,.35)');
+    for(let y=AD+Math.floor(rs(i+9)*40);y<H;y+=44)R(x,y,PW,1,'rgba(90,50,20,.3)');
+    for(let k=0;k<7;k++)R(x+2+Math.floor(rs(i*7+k)*5),AD+Math.floor(rs(i*13+k+50)*(H-AD)),1,3,'rgba(120,70,30,.2)');
+  }
+  for(let y=BASE;y<=FT;y++){const hw=Math.round(hwAt(y));R(90-hw,y,2*hw,1,'rgba(150,52,24,.6)')}   // painted key, the planks show through
+  let pv=null;
+  for(let y=BASE;y<H;y++){
+    const hw=Math.round(hwAt(y)),sl=Math.round(hwAt(y)*SL);
+    if(sl<=89){R(90-sl,y,1,1,LINE);R(89+sl,y,1,1,LINE)}                           // sidelines (they leave the picture almost at once: the court is wider than the scene)
+    if(y<=FT){R(90-hw,y,1,1,LINE);R(89+hw,y,1,1,LINE)}                            // lane lines
+    const z=(y-BASE)/(FT-BASE)*19-5.25,xf=z<=0?22:Math.sqrt(Math.max(0,23.75*23.75-z*z)),x=Math.min(22,xf)*hwAt(y)/8;   // three-point line: straight in the corners, then an arc
+    const xi=Math.round(x),ai=pv===null?xi:pv,lo=Math.min(xi,ai),hi=Math.max(xi,ai),w=hi-lo+1;   // join each row to the previous one so the line has no gaps
+    if(lo<90){R(90-hi,y,w,1,LINE);R(89+lo,y,w,1,LINE)}pv=xi;
+  }
+  R(0,BASE,W,1,LINE);                                                              // baseline, edge to edge
+  const hwF=Math.round(LANE1);R(90-hwF,FT,2*hwF,1,LINE);                           // free-throw line
+  for(const t of[3,7,11,14]){const y=Math.round(BASE+t*(FT-BASE)/19),hw=Math.round(hwAt(y));R(90-hw-4,y,4,1,LINE);R(90+hw,y,4,1,LINE)}   // lane space marks
+  const rx=Math.round(LANE1*.75),ry=14;                                            // free-throw circle: top half solid, bottom half dashed
+  for(let k=0;k<=80;k++){const a=Math.PI*k/80;R(89.5+rx*Math.cos(a)+.01,FT-ry*Math.sin(a),1,1,LINE)}
+  for(let k=0;k<=80;k++){if(Math.floor(k/4)%2)continue;const a=Math.PI+Math.PI*k/80;R(89.5+rx*Math.cos(a)+.01,FT-ry*Math.sin(a),1,1,LINE)}
+  G=ctx;
+})();
+function ring(front,col){for(let i=0;i<36;i++){const a=Math.PI*2*i/36,s=Math.sin(a);if(front?s<0:s>=0)R(RIMX+8*Math.cos(a)-1,RIMY-2.5*s,2,2,col)}}
+GLY['Ћ']=['1100','0100','0111','0101','0101'];                          // one pixel wider so it stays readable at this size
+// small black scoreboard on brackets above the backboard: home and guest score, clock below
+function drawBoard(){
+  const hl='ДОМАЋИ',al='ГОСТИ',lw=nw(hl),aw=nw(al),BW=62,BH=31,x0=59,y0=40,LC='#c8c8d0',AMB='#ffb000',RED='#ff4d3d';
+  const[cm,cs]=String(CFG.clock).split(':').map(v=>v.replace(/\D/g,'').slice(0,2)||'0');
+  const flashing=shot&&shot.celT&&T-shot.celT<1&&Math.floor((T-shot.celT)/.12)%2===0;   // the home score blinks when it changes
+  R(76,71,3,2,'#4a5070');R(101,71,3,2,'#4a5070');
+  R(x0-1,y0-1,BW+2,BH+2,'#2a2a33');R(x0,y0,BW,BH,'#0b0b0f');
+  const lx=x0+5,colon=lx+lw+3,rx=colon+4;
+  drawName(hl,lx+Math.floor(lw/2),y0+3,LC);drawName(al,rx+Math.floor(aw/2),y0+3,LC);R(colon,y0+4,1,1,LC);R(colon,y0+6,1,1,LC);
+  drawNum(home,lx+lw/2,y0+11,2,flashing?'#ffffff':AMB);drawNum(CFG.scoreAway,rx+aw/2,y0+11,2,AMB);
+  drawNum(cm,83.5,y0+24,1,RED);R(90,y0+25,1,1,RED);R(90,y0+27,1,1,RED);drawNum(cs,97.5,y0+24,1,RED);
+}
+function hoopBack(){
+  drawBoard();
+  R(88,102,4,BASE-102,'#4a5070');R(82,BASE-4,16,8,'#d8453a');R(82,BASE-4,16,2,'#f06a5e');   // stanchion with its pad
+  R(71,73,38,30,'#0a0f24');R(72,74,36,28,'#e9eef8');                                         // backboard
+  R(83,82,14,10,'#e63946');R(84,83,12,8,'#e9eef8');                                          // the square: aim at it for a bank shot
+  R(88,98,4,3,'#c4501a');ring(false,'#c4501a');
+}
+function hoopFront(){
+  const sw=netT>0?Math.sin((T-netT)*22)*Math.exp(-(T-netT)*3)*2.5:0,pts=[],bot=[];       // the net swings after a basket
+  for(let i=0;i<=8;i++){pts.push(82+i*2);bot.push(90+(i-4)*1+sw)}
+  const ln=(x0,y0,x1,y1)=>{const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0))|0;for(let i=0;i<=n;i++)R(x0+(x1-x0)*i/n,y0+(y1-y0)*i/n,1,1,'rgba(255,255,255,.85)')};
+  for(let i=0;i<8;i++){ln(pts[i],RIMY+2,bot[i+1],RIMY+14);ln(pts[i+1],RIMY+2,bot[i],RIMY+14)}
+  ring(true,'#ff7a2a');
+}
+
+
+// NPC player in side profile, scaled by distance, hands held out at chest height, ready for the rebound. The sprite is drawn facing right; players on the right side of the key are mirrored so the two face each other.
+function drawNPC(n){
+  const sc=n.sc,dir=-n.side,fx=Math.round(n.x+n.ox),gy=Math.round(n.y),col=n.team==='A'?pShirt:oppCol(),sh=shade(col,.78),OL='#1d1410';
+  const cel=n.team==='A'&&state==='result'&&shot&&shot.celT&&shotNo+1>=N?T-shot.celT-.15:-1;   // after the winning basket the shooter's teammates jump with him
+  const fy=cel>=0?gy-Math.round(Math.abs(Math.sin(cel*8+n.ph))*5*sc):gy;
+  const P=(dx,dy,w,h,c)=>{const pw=Math.max(1,Math.round(w*sc));R(dir>0?fx+dx*sc:fx-dx*sc-pw,fy+dy*sc,pw,Math.max(1,Math.round(h*sc)),c)};
+  R(fx-9*sc,gy-1,Math.round(18*sc),2,'rgba(0,0,0,.25)');
+  P(-6,-4,6,4,'#15191f');P(1,-4,7,4,'#15191f');P(-5,-13,4,9,n.s);P(2,-13,4,9,n.s);   // shoes, legs in a wide stance
+  if(cel>=0)P(8,-56,3,12,shade(n.s,.8));else{P(5,-38,7,3,shade(n.s,.8));P(10,-42,3,6,shade(n.s,.8))}   // far arm: hand open at chest height, or up in the air when celebrating
+  P(-6,-25,13,12,sh);P(-6,-40,13,16,col);                                           // shorts, tank top
+  P(-1,-42,4,3,n.s);                                                                // neck
+  P(-4,-52,10,11,OL);P(-3,-51,8,4,n.h);P(-3,-47,3,6,n.h);P(0,-47,5,6,n.s);P(5,-45,1,2,n.s);P(3,-46,1,1,'#111');   // head: dark outline, dark hair, face and nose toward the key
+  if(cel>=0){P(5,-42,3,5,n.s);P(6,-55,3,13,n.s)}else{P(1,-39,3,7,n.s);P(3,-34,7,3,n.s);P(9,-38,3,7,n.s)}   // near arm: upper arm down, forearm forward, hand open at chest height, ready for the rebound
+}
+// poses: hold (ball over the head, hands on its sides) -> knees bend -> arms push up and the ball leaves the fingertips -> follow-through; then a celebration after a basket or hands on the head after the last miss
+function limb(x0,y0,x1,y1,w,c){const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0),1)|0;for(let i=0;i<=n;i++)R(x0+(x1-x0)*i/n-w/2,y0+(y1-y0)*i/n-w/2,w,w,c)}
+function drawPlayer(){
+  const x=90,sh=pShirt,sc=shade(sh,.78),NUMCOL=lum(sh)>150?'#111':'#fff';
+  const kt=state==='kick'?T-kickT:(shot&&(state==='flying'||state==='result')?KW+(T-shotT):-1);
+  const cel=state==='result'&&shot.celT?T-shot.celT-.15:-1;
+  const fr=state==='frustr'?T-frT:-1;     // frustration: both hands on the head, head shaking, body slumped
+  let o=0,ext=0;
+  if(kt>=0){if(kt<.16)o=Math.round(3*kt/.16);else if(kt<KW){const q=(kt-.16)/(KW-.16);o=Math.round(3-5*q);ext=q}else{ext=1;o=kt<.55?-2:0}}
+  const j=cel>=0?-Math.round(Math.abs(Math.sin(cel*8))*7):0;o+=j;
+  const hx=fr>=0?Math.round(Math.sin(fr*11)*1.6):0;if(fr>=0)o=2;
+  R(x-13,261,26,3,'rgba(0,0,0,.3)');
+  R(x-8,254+o,6,5+j-o,SKIN);R(x+2,254+o,6,5+j-o,SKIN);R(x-8,257+j,6,2,'#f4f1de');R(x+2,257+j,6,2,'#f4f1de');   // legs and socks
+  R(x-9,259+j,8,3,'#15191f');R(x+1,259+j,8,3,'#15191f');                                                      // shoes
+  R(x-10,243+o,20,11,sc);R(x-9,223+o,18,20,sh);R(x-9,223+o,18,2,'rgba(0,0,0,.14)');                          // shorts, tank top
+  R(x-2,221+o,4,3,SKIN);R(x-5+hx,213+o,10,10,HAIR);R(x-5+hx,216+o,10,2,'#f4f1de');R(x-6+hx,217+o,1,3,SKIN);R(x+5+hx,217+o,1,3,SKIN);   // head with headband
+  for(const s of[-1,1]){
+    const sx=x+s*10,sy=223+o;
+    if(cel>=0){limb(sx,sy,x+s*15,214+o,3,SKIN);R(x+s*16-2,208+o,4,5,SKIN)}                                   // arms up in a V
+    else if(fr>=0){limb(sx,sy,x+s*13,219+o,3,SKIN);R(x+s*8-2+hx,211+o,5,6,SKIN)}                            // hands over the ears
+    else{
+      const hy=kt>=KW?RY+2:ball.y+1,hxx=x+s*(7.5-1.5*ext),ey=(sy+hy)/2+2-2*ext;
+      limb(sx,sy,x+s*(13-4*ext),ey,3,SKIN);limb(x+s*(13-4*ext),ey,hxx,hy,3,SKIN);R(hxx-2,hy-2,4,4,SKIN);
+    }
+  }
+  drawName(pName,x,225+o,NUMCOL);drawNum(pNum,x,232+o,2,NUMCOL);
+}
+
+function drawFlags(){
+  for(const c of holders){
+    const f=c.flag,ch=cheer>0,ph=T*(ch?7.5:3.1)*f.w+f.ph,th=Math.sin(ph)*(ch?.8:.6);
+    const dir=Math.cos(ph)>=0?-1:1;                       // the cloth trails behind the swing and flips at each end of it
+    const bob=ch?-Math.abs(Math.sin(T*10+c.p))*3:0,bx=c.x+6,by=c.y+3+bob,L=30,CS=4;
+    R(bx-1,by-3,2,4,c.s);                                 // raised arm
+    for(let i=0;i<=L+2;i++){const x=bx+Math.sin(th)*i,y=by-Math.cos(th)*i;R(x-1,y,3,1,'#0b1030');R(x,y,1,1,i<3?'#8a8a8a':'#f1f1f1')}
+    const cells=[];
+    for(let r=0;r<4;r++){
+      const d=L-1-r*CS,px=bx+Math.sin(th)*d,py=by-Math.cos(th)*d;
+      for(let k=0;k<6;k++){
+        const wv=Math.round(Math.sin(T*(ch?14:6)*f.w-k*.9+f.ph)*(k*.4));
+        cells.push([dir>0?px+1+k*CS:px-CS-k*CS,py-2+wv,(r+k)&1?'#ffffff':pShirt]);
+      }
+    }
+    for(const q of cells)R(q[0]-1,q[1]-1,CS+2,CS+2,'#0b1030');   // dark outline keeps the flag readable on the crowd
+    for(const q of cells)R(q[0],q[1],CS,CS,q[2]);
+  }
+}
+
+function draw(){
+  R(0,0,W,83,'#161d3f');
+  for(const c of crowd){
+    let o=0;if(cheer>0)o=-Math.abs(Math.sin(T*10+c.p))*3;else if(Math.sin(T*1.7+c.p*3)>.92)o=-1;
+    const x=c.x,y=c.y+o;
+    R(x,y+4,6,3,c.sh);R(x,y,5,1,c.h);R(x,y+1,5,3,c.s);R(x+1,y+2,1,1,'#1b1b2f');R(x+3,y+2,1,1,'#1b1b2f');
+    R(cheer>0?x+1:x+2,y+3,cheer>0?3:1,1,'#8a2a2a');
+    if(cheer>0){R(x-1,y+1,1,4,c.s);R(x+5,y+1,1,4,c.s)}
+  }
+  drawFlags();
+  for(let x=0;x<W;x+=30){R(x,74,30,9,ADS[x/30%6]);R(x,82,30,1,'#0a0f24')}
+  ctx.drawImage(court,0,0);
+  hoopBack();
+  for(const n of npcs)drawNPC(n);
+  const s=Math.max(5,Math.round(ball.s));
+  if((state==='result'||state==='frustr')&&ball.y>RIMY+14)R(ball.x-3,(shot.made?158:178)+5,6,2,'rgba(0,0,0,.28)');   // ground shadow once the ball is falling
+  ctx.drawImage(bs,Math.round(ball.x-s/2),Math.round(ball.y-s/2),s,s);
+  hoopFront();
+  if(flash>0)R(70,72,40,50,'rgba(255,255,255,'+(flash*.45).toFixed(2)+')');
+  for(const q of parts)R(q.x,q.y,2,2,q.c);
+  if(state==='ready'){const z=Math.floor(T*4)%3;ctx.strokeStyle='#ffd23f';ctx.lineWidth=1;ctx.strokeRect(BX-11-z+.5,BY-11-z+.5,22+2*z,22+2*z)}
+  if(state==='aiming'&&aim&&aimDist>=8){
+    for(let i=1;i<14;i++){const b=flightAt(BX,RY,aim.x,aim.y,i/14);R(b.x,b.y,2,2,'rgba(255,255,255,.8)')}   // dotted preview of the arc
+    const c=Math.floor(T*6)%2?'#ffd23f':'#ff6b6b',x=Math.round(aim.x),y=Math.round(aim.y);
+    R(x-7,y,4,1,c);R(x+4,y,4,1,c);R(x,y-7,1,4,c);R(x,y+4,1,4,c);R(x-1,y-1,3,3,c);
+  }
+  drawPlayer();
+}
+
+// whole-number pixel scale keeps every 1px pitch line the same thickness on any phone
+function fit(){
+  const ae=document.activeElement;if(ae===$('iName')||ae===$('iNum'))return;   // keep the size steady while the phone keyboard is open
+  const dpr=window.devicePixelRatio||1,de=document.documentElement;
+  const k=Math.max(1,Math.floor(Math.min(de.clientWidth-32,520,(de.clientHeight-48)/1.5)*dpr/W));
+  $('stage').style.width=(W*k/dpr)+'px';
+}
+fit();addEventListener('resize',fit);
+let last=performance.now();
+(function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);draw();requestAnimationFrame(loop)})(last);
+})();
+</script>
+</body></html>
