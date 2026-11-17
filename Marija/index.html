@@ -580,6 +580,7 @@ const fx=[],pops=[],confetti=[];
 const streaks=Array.from({length:12},(_,i)=>({x:20+i*30+(i%3)*7,y:Math.random()*H,v:60+Math.random()*60,l:22+Math.random()*20}));
 const keys={l:0,r:0};
 let gearRot=0;
+const MOVE_SPEED=250; // brzina kuvarice (jedinice u sekundi) dok drzis levu/desnu stranu
 
 function newGame(){
   const need={};GOOD.forEach(k=>need[k]=CFG.need);
@@ -621,14 +622,14 @@ function setPlayUI(on){$('hud').hidden=!on;$('recipe').hidden=!on;}
 
 /* flow */
 function startGame(){
-  G=newGame();state='play';SCREENS.forEach(s=>$(s).hidden=true);$('mCard').hidden=true;setPlayUI(true);updateHUD();
+  held.clear();G=newGame();state='play';SCREENS.forEach(s=>$(s).hidden=true);$('mCard').hidden=true;setPlayUI(true);updateHUD();
   $('hint').hidden=false;clearTimeout(startGame.h);startGame.h=setTimeout(()=>$('hint').hidden=true,4500);
   confetti.length=0;fx.length=0;pops.length=0;
 }
 function showLose(){state='lose';setPlayUI(false);$('hint').hidden=true;
   $('loseTxt').textContent=LOSE_TXT[G.stuck.type];icon($('loseIco'),G.stuck.type,44);showScreen('sLose');}
 function showWin(){state='win';setPlayUI(false);showScreen('sWin');sizeCake();}
-function pauseGame(){if(state!=='play')return;state='pause';$('sPause').hidden=false;}
+function pauseGame(){if(state!=='play')return;held.clear();state='pause';$('sPause').hidden=false;}
 function resumeGame(){if(state!=='pause')return;state='play';$('sPause').hidden=true;}
 
 /* spawn */
@@ -658,7 +659,7 @@ function update(dt){
   for(const p of pops)p.t+=dt;for(let i=pops.length-1;i>=0;i--)if(pops[i].t>.9)pops.splice(i,1);
   G.pulse=Math.max(0,G.pulse-dt*5);G.happyT=Math.max(0,G.happyT-dt);G.wig=Math.max(0,G.wig-dt*2.2);
   if(state==='play'||state==='finish'||state==='fail'){
-    if(state==='play'&&(keys.l||keys.r))G.tx=clamp(G.tx+(keys.r-keys.l)*330*dt,52,308);
+    if(state==='play'){const d=holdDir()||(keys.r-keys.l);if(d)G.tx=clamp(G.tx+d*MOVE_SPEED*dt,52,308);}
     const nx=G.x+(G.tx-G.x)*Math.min(1,dt*14);G.vx=(nx-G.x)/Math.max(dt,.001);G.x=nx;
   }
   for(const c of G.caught)c.t+=dt;for(let i=G.caught.length-1;i>=0;i--)if(G.caught[i].t>.28)G.caught.splice(i,1);
@@ -740,8 +741,16 @@ function drawParty(){
 
 /* input */
 function pointerX(e){const r=stageEl.getBoundingClientRect();return clamp((e.clientX-r.left)/r.width*W,52,308);}
-stageEl.addEventListener('pointerdown',e=>{initAudio();if(state==='play'&&!e.target.closest('button')){G.tx=pointerX(e);$('hint').hidden=true;}});
-stageEl.addEventListener('pointermove',e=>{if(state==='play'&&!e.target.closest('button')){G.tx=pointerX(e);if(e.buttons||e.pointerType==='touch')$('hint').hidden=true;}});
+/* Controls: press and hold the left or right half of the screen to walk that way (smooth constant speed) */
+const held=new Map();
+function sideOf(e){const r=stageEl.getBoundingClientRect();return e.clientX<r.left+r.width/2?-1:1;}
+function holdDir(){let d=0;held.forEach(v=>d+=v);return clamp(d,-1,1);}
+document.addEventListener('pointerdown',e=>{initAudio();
+  if(state!=='play'||e.target.closest('button'))return;
+  held.set(e.pointerId,sideOf(e));keys.l=keys.r=0;$('hint').hidden=true;});
+const release=e=>{held.delete(e.pointerId);};
+document.addEventListener('pointerup',release);document.addEventListener('pointercancel',release);
+addEventListener('blur',()=>{held.clear();keys.l=keys.r=0;});
 addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a')keys.l=1;if(e.key==='ArrowRight'||e.key==='d')keys.r=1;if(e.key==='Escape'){state==='play'?pauseGame():resumeGame();}});
 addEventListener('keyup',e=>{if(e.key==='ArrowLeft'||e.key==='a')keys.l=0;if(e.key==='ArrowRight'||e.key==='d')keys.r=0;});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame();});
@@ -762,5 +771,6 @@ let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(state!=='pause'){T+=dt;update(dt);}render();requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 </script>
+
 
 </body></html>
