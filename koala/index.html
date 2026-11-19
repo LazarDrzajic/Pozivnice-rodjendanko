@@ -66,6 +66,8 @@ body{
 .koala[data-mood="happy"] [data-m~="happy"],
 .koala[data-mood="cheer"] [data-m~="cheer"],
 .koala[data-mood="sad"] [data-m~="sad"]{display:inline}
+.kw .koala[data-mood="happy"] .karm,.kw .koala[data-mood="cheer"] .karm{transform-box:view-box; transform-origin:136px 150px; animation:wave 1.3s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:rotate(0)}50%{transform:rotate(-12deg)}}
 .kb{transform-origin:50% 100%; animation:bob 2.6s ease-in-out infinite}
 .eyes{transform-box:fill-box; transform-origin:center; animation:blink 4.2s infinite}
 @keyframes bob{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-1.5px) scaleY(1.012)}}
@@ -143,18 +145,26 @@ body{
 .kbox{position:absolute; left:-1cqw; top:60cqw; width:34cqw; z-index:6}
 .kbox.hit{animation:koalahit .3s ease-out}
 @keyframes koalahit{40%{transform:translateX(1cqw) rotate(2deg)}}
+.game{--L:74; --ang:-82; --g:26}
+.rig{position:absolute; inset:0; pointer-events:none; z-index:7}
 .stick{
-  position:absolute; left:27.2cqw; top:85.8cqw; z-index:7; pointer-events:none;
-  --len:24; --ang:-80;
-  width:calc(var(--len) * 1cqw); height:2.4cqw; margin-top:-1.2cqw; transform-origin:0 50%;
-  transform:rotate(calc(var(--ang) * 1deg));
-  background:linear-gradient(#c98a4a,#98602c 60%,#7a4a22); border:.35cqw solid #4a2f18; border-radius:1.2cqw;
-  transition:width .2s cubic-bezier(.3,1.3,.5,1), transform .2s ease-out;
+  position:absolute; left:27.2cqw; top:calc(85.8cqw - 1.4cqw); width:calc(var(--L) * 1cqw); height:2.8cqw;
+  transform-origin:0 50%;
+  transform:rotate(calc(var(--ang) * 1deg)) translateX(calc(var(--g) * -1cqw));
+  background:
+    radial-gradient(circle at 34% 40%, #4a2f18 0 .45cqw, transparent .55cqw),
+    radial-gradient(circle at 74% 62%, #4a2f18 0 .4cqw, transparent .5cqw),
+    linear-gradient(#b8814a,#8f5c2d 55%,#6b4222);
+  border:.35cqw solid #3d2814; border-radius:1.4cqw;
+  transition:transform .2s cubic-bezier(.3,1.15,.5,1);
 }
-.stick::after{content:""; position:absolute; right:.4cqw; top:.2cqw; width:1.1cqw; height:1.1cqw; border-radius:50%; background:#4a2f18; opacity:.5; box-shadow:-9cqw .2cqw 0 -.2cqw rgba(74,47,24,.5)}
-.stick::before{
-  content:""; position:absolute; left:-2.6cqw; top:50%; width:5.4cqw; height:5.4cqw; margin-top:-2.7cqw; border-radius:50%;
-  background:#a5aeb6; border:.5cqw solid #3c444b;
+.paw{
+  position:absolute; left:calc(27.2cqw - 3cqw); top:calc(85.8cqw - 3cqw); width:6cqw; height:6cqw; z-index:9; pointer-events:none;
+  border-radius:50%; background:linear-gradient(#b6bcc1,#979da3); border:.5cqw solid #2a2a2f;
+}
+.paw::after{
+  content:""; position:absolute; left:1.5cqw; top:.9cqw; width:2.4cqw; height:3.4cqw;
+  background:repeating-linear-gradient(180deg, transparent 0 .8cqw, #2a2a2f .8cqw 1.05cqw);
 }
 .hint{
   position:absolute; left:33cqw; right:25cqw; top:108.5cqw; z-index:6; text-align:center;
@@ -190,7 +200,7 @@ body{
 .card .note{margin:0; font:800 3.6cqw/1.3 var(--font); text-wrap:balance}
 
 @media (prefers-reduced-motion:reduce){
-  .kb,.eyes,.conf,.pill.low span{animation:none}
+  .kb,.eyes,.karm,.conf,.pill.low span{animation:none}
   .tile.up .inner,.tile.down .inner,.tile.shake .inner,.tile.done .inner{animation-duration:.2s,.01s}
   .stick{transition-duration:.01s}
 }
@@ -198,6 +208,7 @@ body{
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
+    <linearGradient id="kfur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b6bcc1"/><stop offset="1" stop-color="#979da3"/></linearGradient>
     <clipPath id="hatclip"><path d="M50 12 L79 84 L21 84 Z"/></clipPath>
     <symbol id="i-gift" viewBox="0 0 100 100">
       <g stroke="#6b2a2a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
@@ -292,7 +303,8 @@ body{
       <div class="grid" id="grid"></div>
     </div>
     <div class="kbox" id="kbox"></div>
-    <div class="stick" id="stick"></div>
+    <div class="rig"><div class="stick"></div></div>
+    <div class="paw"></div>
     <div class="hint" id="hint">Додирни неко поље!</div>
   </div>
 
@@ -414,70 +426,155 @@ function buildBg(){
 
 /* ===== Koala ===== */
 function koala(mood){
-  const O = 'stroke="#3c444b" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"';
-  const lv = [[63,165,30],[77,170,20],[91,172,8],[105,173,-8],[118,171,-20],[132,167,-30]]
-    .map(([x,y,a])=>`<ellipse cx="${x}" cy="${y}" rx="8" ry="4.5" transform="rotate(${a} ${x} ${y})" fill="#62c15a" stroke="#2d6a2a" stroke-width="1.6"/>`).join('');
+  const L = '#2a2a2f', F = 'url(#kfur)';
+  const O = `stroke="${L}" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"`;
+  const leaf = (x,y,r,s) => `<g transform="translate(${x} ${y}) rotate(${r}) scale(${s})"><path d="M0 0Q6.5 7 0 20Q-6.5 7 0 0Z" fill="#7cc24c" stroke="#2f6b2a" stroke-width="1.7" stroke-linejoin="round"/><path d="M0 3V15" stroke="#2f6b2a" stroke-width="1" fill="none"/></g>`;
   return `<svg class="koala" data-mood="${mood}" viewBox="0 0 200 260" aria-hidden="true"><g class="kb">
-    <ellipse cx="64" cy="241" rx="30" ry="15" fill="#929ca5" ${O}/><ellipse cx="136" cy="241" rx="30" ry="15" fill="#929ca5" ${O}/>
-    <path d="M50 237v7M64 235v9M78 237v7M122 237v7M136 235v9M150 237v7" fill="none" stroke="#3c444b" stroke-width="3" stroke-linecap="round"/>
-    <ellipse cx="100" cy="190" rx="58" ry="58" fill="#a5aeb6" ${O}/>
-    <ellipse cx="100" cy="202" rx="35" ry="40" fill="#f3f0e8"/>
-    <ellipse cx="44" cy="194" rx="15" ry="33" transform="rotate(14 44 194)" fill="#a5aeb6" ${O}/>
-    <ellipse cx="158" cy="176" rx="15" ry="30" transform="rotate(-32 158 176)" fill="#a5aeb6" ${O}/>
-    <path d="M54 160Q100 186 146 160" fill="none" stroke="#4f8a38" stroke-width="3"/>${lv}
-    <circle cx="36" cy="62" r="31" fill="#a5aeb6" ${O}/><circle cx="164" cy="62" r="31" fill="#a5aeb6" ${O}/>
-    <circle cx="38" cy="64" r="18" fill="#f9dfe4"/><circle cx="162" cy="64" r="18" fill="#f9dfe4"/>
-    <path d="M16 72q-6 8 3 13M184 72q6 8 -3 13" fill="none" stroke="#f3f0e8" stroke-width="5" stroke-linecap="round"/>
-    <ellipse cx="100" cy="100" rx="68" ry="58" fill="#a5aeb6" ${O}/>
-    <ellipse cx="100" cy="126" rx="38" ry="27" fill="#e4e8ea"/>
-    <ellipse cx="100" cy="106" rx="17" ry="21" fill="#2b2f34"/><ellipse cx="94" cy="98" rx="5" ry="6" fill="#fff" opacity=".35"/>
-    <g class="eyes" data-m="happy sad"><circle cx="68" cy="88" r="9.5" fill="#2b2f34"/><circle cx="132" cy="88" r="9.5" fill="#2b2f34"/><circle cx="65" cy="84" r="3.2" fill="#fff"/><circle cx="129" cy="84" r="3.2" fill="#fff"/></g>
-    <g data-m="cheer" fill="none" stroke="#2b2f34" stroke-width="5" stroke-linecap="round"><path d="M57 92Q68 76 79 92"/><path d="M121 92Q132 76 143 92"/></g>
-    <g data-m="sad" fill="none" stroke="#3c444b" stroke-width="4" stroke-linecap="round"><path d="M55 78L81 68M145 78L119 68"/></g>
-    <path data-m="sad" d="M58 100q-5 10 0 14q5-4 0-14z" fill="#7fd0ff"/>
-    <circle cx="54" cy="117" r="8" fill="#ff9db0" opacity=".55"/><circle cx="146" cy="117" r="8" fill="#ff9db0" opacity=".55"/>
-    <path data-m="happy" d="M84 134Q100 152 116 134Q100 140 84 134Z" fill="#8a2438" stroke="#3c444b" stroke-width="3" stroke-linejoin="round"/>
-    <path data-m="cheer" d="M79 132Q100 166 121 132Z" fill="#8a2438" stroke="#3c444b" stroke-width="3" stroke-linejoin="round"/>
-    <path data-m="cheer" d="M90 149Q100 159 110 149Q100 143 90 149Z" fill="#ff8da0"/>
-    <path data-m="sad" d="M86 147Q100 133 114 147" fill="none" stroke="#3c444b" stroke-width="4.5" stroke-linecap="round"/>
+    <ellipse cx="68" cy="243" rx="27" ry="12" fill="${F}" ${O}/><ellipse cx="132" cy="243" rx="27" ry="12" fill="${F}" ${O}/>
+    <path d="M52 245q2 4 0 8M64 247q0 4 0 8M76 246q-2 4 0 8M124 246q2 4 0 8M136 247q0 4 0 8M148 245q-2 4 0 8" fill="none" stroke="${L}" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M42 150C24 184 30 224 56 240L144 240C170 224 176 184 158 150C132 138 68 138 42 150Z" fill="${F}" ${O}/>
+    
+    <ellipse cx="100" cy="199" rx="38" ry="39" fill="#f2efe7" stroke="#8b8f94" stroke-width="2"/>
+    <path d="M60 148C38 152 26 184 36 206C44 222 78 222 86 204C91 192 82 176 80 160C79 152 72 147 60 148Z" fill="${F}" ${O}/>
+    
+    <path d="M60 146Q100 176 140 146" fill="none" stroke="#6b4a2a" stroke-width="2.2" stroke-linecap="round"/>
+    ${leaf(68,151.5,45,.8)}${leaf(80,157.3,25,.9)}${leaf(100,161,0,1.15)}${leaf(120,157.3,-25,.9)}${leaf(132,151.5,-45,.8)}
+    <g class="karm"><path d="M126 150C138 134 176 134 183 156C188 176 160 190 136 178C124 172 120 160 126 150Z" fill="${F}" ${O}/></g>
+    <circle cx="38" cy="62" r="33" fill="${F}" ${O}/><circle cx="162" cy="62" r="33" fill="${F}" ${O}/>
+    <ellipse cx="42" cy="66" rx="21" ry="24" fill="#f6f1ea" stroke="#e5b0b6" stroke-width="3"/><ellipse cx="158" cy="66" rx="21" ry="24" fill="#f6f1ea" stroke="#e5b0b6" stroke-width="3"/>
+    <path d="M34 58q-4 7 0 14M52 60q4 5 1 11M166 58q4 7 0 14M148 60q-4 5 -1 11" fill="none" stroke="#d6cdbf" stroke-width="2.2" stroke-linecap="round"/>
+    
+    <path d="M84 46Q86 34 95 38Q99 28 106 37Q115 34 116 46Z" fill="${F}" ${O}/>
+    
+    <ellipse cx="100" cy="98" rx="70" ry="56" fill="${F}" ${O}/>
+    <ellipse cx="100" cy="125" rx="38" ry="23" fill="#d6dadd"/>
+    <path d="M70 58q6 -4 12 0M118 58q6 -4 12 0" fill="none" stroke="#6f757c" stroke-width="2" stroke-linecap="round"/>
+    <g class="eyes" data-m="happy sad">
+      <ellipse cx="68" cy="88" rx="11.5" ry="12.5" fill="#fff" stroke="${L}" stroke-width="2.6"/><ellipse cx="132" cy="88" rx="11.5" ry="12.5" fill="#fff" stroke="${L}" stroke-width="2.6"/>
+      <circle cx="70" cy="89" r="8" fill="#1d1d22"/><circle cx="130" cy="89" r="8" fill="#1d1d22"/>
+      <circle cx="67" cy="85" r="3.2" fill="#fff"/><circle cx="127" cy="85" r="3.2" fill="#fff"/><circle cx="73" cy="93" r="1.5" fill="#fff"/><circle cx="133" cy="93" r="1.5" fill="#fff"/>
+    </g>
+    <g data-m="cheer" fill="none" stroke="${L}" stroke-width="4.6" stroke-linecap="round"><path d="M57 92Q68 75 79 92"/><path d="M121 92Q132 75 143 92"/></g>
+    <g data-m="sad" fill="none" stroke="${L}" stroke-width="4" stroke-linecap="round"><path d="M54 76L80 66M146 76L120 66"/></g>
+    <path data-m="sad" d="M57 100q-5 9 0 13q5 -4 0 -13z" fill="#8fd6ff" stroke="#2f86b8" stroke-width="1.2"/>
+    <ellipse cx="56" cy="115" rx="8" ry="6" fill="#ff9db0" opacity=".5"/><ellipse cx="144" cy="115" rx="8" ry="6" fill="#ff9db0" opacity=".5"/>
+    <ellipse cx="100" cy="100" rx="16" ry="19" transform="rotate(-6 100 100)" fill="#26262b"/><ellipse cx="93" cy="92" rx="6" ry="3.5" transform="rotate(-25 93 92)" fill="#fff" opacity=".5"/>
+    <path d="M100 117V125" stroke="${L}" stroke-width="2.6" stroke-linecap="round"/>
+    <path data-m="happy" d="M86 126Q100 134 114 126Q111 144 100 144Q89 144 86 126Z" fill="#c9324a" stroke="${L}" stroke-width="3" stroke-linejoin="round"/>
+    <path data-m="happy" d="M92 138Q100 133 108 138Q105 143 100 143Q95 143 92 138Z" fill="#ff93a4"/>
+    <path data-m="cheer" d="M84 125Q100 135 116 125Q113 148 100 148Q87 148 84 125Z" fill="#c9324a" stroke="${L}" stroke-width="3" stroke-linejoin="round"/>
+    <path data-m="cheer" d="M91 139Q100 133 109 139Q106 147 100 147Q94 147 91 139Z" fill="#ff93a4"/>
+    <path data-m="sad" d="M90 142Q100 133 110 142" fill="none" stroke="${L}" stroke-width="4" stroke-linecap="round"/>
   </g></svg>`;
 }
 function setMood(el, mood){ const k = $('.koala', el) || el; k.setAttribute('data-mood', mood); }
 
-/* ===== sound (all synthesised) ===== */
-let AC = null, master = null, soundOn = true;
+/* ===== sound (all synthesised in code, no audio files) ===== */
+let AC = null, master = null, musicBus = null, soundOn = true;
 function audio(){
-  if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = .55; master.connect(AC.destination); }catch(e){ AC = null; } }
-  if(AC && AC.state === 'suspended'){ try{ AC.resume(); }catch(e){} }
+  if(!AC){
+    try{
+      AC = new (window.AudioContext||window.webkitAudioContext)();
+      const comp = AC.createDynamicsCompressor(); comp.threshold.value = -10; comp.ratio.value = 4;
+      master = AC.createGain(); master.gain.value = .9; master.connect(comp); comp.connect(AC.destination);
+      musicBus = AC.createGain(); musicBus.gain.value = .17; musicBus.connect(master);
+    }catch(e){ AC = null; }
+  }
+  if(AC && AC.state === 'suspended'){ try{ const r = AC.resume(); if(r && r.catch) r.catch(()=>{}); }catch(e){} }
   return AC;
 }
-function tone(f1, f2, dur, type, vol, delay){
-  if(!soundOn || !audio()) return;
-  const t = AC.currentTime + (delay||0), o = AC.createOscillator(), g = AC.createGain();
-  o.type = type||'sine'; o.frequency.setValueAtTime(f1, t);
-  if(f2) o.frequency.exponentialRampToValueAtTime(f2, t+dur);
-  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol||.3, t+.012); g.gain.exponentialRampToValueAtTime(.0001, t+dur);
-  o.connect(g); g.connect(master); o.start(t); o.stop(t+dur+.05);
+const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+function env(g, t, a, peak, dur){ g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(.0001, t + dur); }
+/* marimba-like pluck: fundamental + short bright overtones */
+function pluck(freq, dur, vol, at, dest){
+  [[1,1,1],[4,.22,.35],[2.01,.12,.5]].forEach(([m, v, d]) => {
+    const o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine'; o.frequency.value = freq * m;
+    env(g, at, .006, vol * v, dur * d); o.connect(g); g.connect(dest || master); o.start(at); o.stop(at + dur + .05);
+  });
 }
-function noise(dur, vol, freq, type, delay){
-  if(!soundOn || !audio()) return;
-  const n = Math.floor(AC.sampleRate*dur), buf = AC.createBuffer(1, n, AC.sampleRate), d = buf.getChannelData(0);
-  for(let i=0;i<n;i++) d[i] = (Math.random()*2-1) * (1-i/n);
-  const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(), t = AC.currentTime + (delay||0);
-  s.buffer = buf; f.type = type||'bandpass'; f.frequency.value = freq; g.gain.value = vol;
-  s.connect(f); f.connect(g); g.connect(master); s.start(t);
+/* short filtered noise burst (clicks, creaks, ticks) */
+function burst(at, dur, vol, freq, q, dest, sweepTo, type){
+  const n = Math.max(1, Math.floor(AC.sampleRate * dur)), buf = AC.createBuffer(1, n, AC.sampleRate), d = buf.getChannelData(0);
+  for(let i=0;i<n;i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/n, 2);
+  const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+  s.buffer = buf; f.type = type || 'bandpass'; f.Q.value = q; f.frequency.setValueAtTime(freq, at);
+  if(sweepTo) f.frequency.linearRampToValueAtTime(sweepTo, at + dur);
+  g.gain.value = vol; s.connect(f); f.connect(g); g.connect(dest || master); s.start(at);
 }
+/* hollow wooden body of a knock */
+function knock(at, f, vol, dur){
+  const o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine';
+  o.frequency.setValueAtTime(f, at); o.frequency.exponentialRampToValueAtTime(f * .6, at + dur);
+  env(g, at, .003, vol, dur); o.connect(g); g.connect(master); o.start(at); o.stop(at + dur + .03);
+}
+function woodClick(at, f, vol){ burst(at, .035, vol, f, 7); knock(at, f * .32, vol * .9, .07); }
+function play(fn){ if(!soundOn || !audio()) return; fn(AC.currentTime + .005); }
+
 const sfx = {
-  tap(){ tone(220, 70, .14, 'sine', .55); noise(.06, .35, 1100, 'bandpass'); },
-  flip(){ noise(.2, .22, 2600, 'highpass'); tone(500, 900, .12, 'triangle', .08); },
-  match(){ tone(660, 0, .14, 'triangle', .3); tone(880, 0, .14, 'triangle', .3, .1); tone(1320, 0, .22, 'triangle', .26, .2); },
-  miss(){ tone(300, 140, .32, 'sawtooth', .14); },
-  win(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f, 0, .22, 'square', .14, i*.11)); },
-  lose(){ [392,349,311,262].forEach((f,i)=>tone(f, 0, .3, 'triangle', .22, i*.2)); }
+  ui(){ play(t => { pluck(784, .16, .34, t); burst(t, .02, .16, 2600, 3); }); },
+  tap(){ play(t => { burst(t, .05, .95, 1300, 4); knock(t, 250, .8, .11); }); },
+  /* wooden mechanism turning: clack, ratchet ticks with a soft creak, clack */
+  flip(){ play(t => {
+    woodClick(t, 1500, .9);
+    [.1,.17,.24,.31].forEach((d, i) => burst(t + d, .02, .22, 2300 + i*150, 6));
+    burst(t + .05, .35, .1, 350, 2, null, 750);
+    woodClick(t + .43, 1000, .8);
+  }); },
+  match(){ play(t => {
+    [1047, 1319, 1568, 2093].forEach((f, i) => pluck(f, .55, .5, t + i*.085));
+    knock(t, 520, .25, .12);
+  }); },
+  miss(){ play(t => {
+    pluck(392, .4, .6, t); knock(t, 200, .45, .12);
+    pluck(294, .55, .6, t + .17); knock(t + .17, 150, .45, .14);
+  }); },
+  win(){ play(t => {
+    [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => pluck(f, .5, .36, t + i*.1));
+    [1047, 1319, 1568].forEach(f => pluck(f, 1.1, .26, t + .75));
+    pluck(262, 1.2, .34, t + .75);
+  }); },
+  lose(){ play(t => {
+    [392, 330, 262].forEach((f, i) => pluck(f, i === 2 ? .9 : .45, .55, t + i*.22));
+  }); }
 };
-$('#snd').addEventListener('click', ()=>{
-  soundOn = !soundOn; $('#snd').textContent = 'ЗВУК: ' + (soundOn ? 'ДА' : 'НЕ'); if(soundOn){ audio(); sfx.tap(); }
+$('#snd').addEventListener('click', () => {
+  soundOn = !soundOn; $('#snd').textContent = 'ЗВУК: ' + (soundOn ? 'ДА' : 'НЕ');
+  if(soundOn){ audio(); musicStart(); }
 });
+document.addEventListener('click', e => {
+  audio(); musicStart();
+  if(e.target.closest && e.target.closest('.btn')) sfx.ui();
+}, true);
+document.addEventListener('visibilitychange', () => {
+  if(!AC) return;
+  if(document.hidden){ try{ AC.suspend().catch(()=>{}); }catch(e){} } else if(soundOn){ audio(); }
+});
+
+/* ===== quiet background melody: 8 bars, C - Am - F - G, marimba tune over a plucked bass ===== */
+const BPM = 112, STEP = 60 / BPM / 2, N = null;
+const TUNE = [
+  [79,N,76,N,79,76,74,N], [76,N,72,N,76,74,72,N], [81,N,77,N,81,79,77,N], [79,N,74,N,79,77,74,71],
+  [84,N,81,79,76,N,79,N], [81,N,79,76,72,N,76,N], [77,N,81,84,81,N,77,N], [79,77,74,77,79,N,N,N]
+];
+const ROOTS = [48,45,41,43,48,45,41,43];
+let mNext = 0, mStep = 0, mTimer = null;
+function playStep(step, at){
+  if(!soundOn) return;
+  const bar = Math.floor(step / 8) % 8, s = step % 8, note = TUNE[bar][s];
+  if(note !== N) pluck(hz(note), .3, .6, at, musicBus);
+  if(s === 0) pluck(hz(ROOTS[bar]), .5, .75, at, musicBus);
+  if(s === 4) pluck(hz(ROOTS[bar] + 7), .32, .45, at, musicBus);
+  if(s === 2 || s === 6) burst(at, .025, .3, 5200, 2, musicBus);
+}
+function musicTick(){
+  if(!AC) return;
+  if(mNext < AC.currentTime - .2) mNext = AC.currentTime + .05;
+  while(mNext < AC.currentTime + .35){ playStep(mStep, mNext); mNext += STEP; mStep = (mStep + 1) % 64; }
+}
+function musicStart(){
+  if(!AC || mTimer) return;
+  mNext = AC.currentTime + .15; mStep = 0; mTimer = setInterval(musicTick, 90);
+}
 
 /* ===== screens ===== */
 const SCREENS = ['splash','welcome','win','lose'];
@@ -542,23 +639,26 @@ function newGame(){
 }
 
 /* stick geometry: pivot at the Koala's raised paw, in stage cqw */
-const PIVOT = {x:27.2, y:85.8};
-function idleStick(){ const s = $('#stick'); s.style.setProperty('--len', 24); s.style.setProperty('--ang', -80); }
-function aimStick(el){
+const PIVOT = {x:27.2, y:85.8}, STICK = 74, IDLE = {ang:-82, g:26};
+function rig(ang, g){ const s = $('#game').style; s.setProperty('--ang', ang.toFixed(2)); s.setProperty('--g', g.toFixed(2)); }
+function idleStick(){ rig(IDLE.ang, IDLE.g); }
+/* the stick keeps one length: it turns around the paw and slides through it, tip stops `ahead` cqw before the tile */
+function aimStick(el, ahead){
   const sr = stage.getBoundingClientRect(), r = el.getBoundingClientRect(), u = sr.width/100;
-  const tx = (r.left + r.width/2 - sr.left)/u, ty = (r.top + r.height/2 - sr.top)/u;
+  const tx = (r.left + r.width*.4 - sr.left)/u, ty = (r.top + r.height*.6 - sr.top)/u;
   const dx = tx - PIVOT.x, dy = ty - PIVOT.y, d = Math.hypot(dx, dy);
-  const s = $('#stick'); s.style.setProperty('--len', (d - 1).toFixed(2)); s.style.setProperty('--ang', (Math.atan2(dy, dx)*180/Math.PI).toFixed(2));
+  rig(Math.atan2(dy, dx)*180/Math.PI, Math.min(STICK, Math.max(0, STICK - (d - (ahead||0)))));
 }
 function tap(i, hit){
   const el = tiles[i].el;
-  aimStick(el);
+  aimStick(el, 6);
+  later(() => aimStick(el, 0), 170);
   later(() => {
     sfx.tap(); el.classList.add('pop'); later(() => el.classList.remove('pop'), 260);
     const kb = $('#kbox'); kb.classList.remove('hit'); void kb.offsetWidth; kb.classList.add('hit');
     hit();
-  }, 210);
-  later(idleStick, 480);
+  }, 330);
+  later(idleStick, 650);
 }
 function flipUp(i){
   const t = tiles[i]; t.up = true; t.el.classList.remove('down'); t.el.classList.add('up'); sfx.flip();
@@ -630,7 +730,7 @@ function init(){
   ].map(t => `<li>${t}</li>`).join('');
   $('#cardTitle').textContent = `${CFG.name} те позива на свој ${CFG.age}. рођендан!`;
   $('#cDate').textContent = CFG.date; $('#cTime').textContent = CFG.time; $('#cPlace').textContent = CFG.place; $('#cNote').textContent = CFG.note;
-  $('#btnAccept').addEventListener('click', () => { audio(); sfx.tap(); show('welcome'); });
+  $('#btnAccept').addEventListener('click', () => { show('welcome'); });
   $('#btnStart').addEventListener('click', () => { audio(); newGame(); });
   $('#btnOpen').addEventListener('click', () => { sfx.match(); $('#card').hidden = false; });
   $('#btnCloseCard').addEventListener('click', () => { $('#card').hidden = true; });
