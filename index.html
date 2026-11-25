@@ -4,13 +4,13 @@
 <meta name="color-scheme" content="only light">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@600;800&family=Manrope:wght@400;500;600&display=swap">
 <style>
-/* Layout: festive header, optional category sidebar on the left (appears once any video has a category), 10-card grid, numbered pages below. */
+/* Layout: festive header, category sidebar on the left, card grid, numbered pages below. */
 :root {
   color-scheme: only light;
-  --bg: #faf5eb; /* page background: change this colour (white: #ffffff) */
+  --bg: #faf5eb;
   --surface: #ffffff;
-  --fg: #7b3ff2; /*#2a1f3d;*/
-  --muted: #7b3ff2; /*#6c5f82;*/
+  --fg: #7b3ff2;
+  --muted: #7b3ff2;
   --line: #e6dccb;
   --accent: #7b3ff2;
   --accent-fg: #ffffff;
@@ -42,7 +42,6 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
 .wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 32px; --h1: clamp(2.2rem, 6vw, 4rem); }
-/* The Russian headline is the longest, so it is set a little smaller to stay clear of the language dropdown. */
 html[lang="ru"] .wrap { --h1: clamp(2rem, 4.6vw, 3.1rem); }
 
 /* Header */
@@ -75,7 +74,7 @@ html[lang="ru"] .wrap { --h1: clamp(2rem, 4.6vw, 3.1rem); }
 
 /* Body layout */
 .layout { display: grid; gap: 32px; grid-template-columns: minmax(0, 1fr); align-items: start; }
-.layout.has-side { grid-template-columns: 220px minmax(0, 1fr); }
+.layout.has-side { grid-template-columns: 255px minmax(0, 1fr); }
 
 /* Category sidebar */
 .side h2 {
@@ -83,19 +82,43 @@ html[lang="ru"] .wrap { --h1: clamp(2rem, 4.6vw, 3.1rem); }
   color: var(--muted); margin: 0 0 12px; font-weight: 600;
 }
 .cats { display: flex; flex-direction: column; gap: 4px; }
+.cat-group { display: flex; flex-direction: column; gap: 4px; }
 .cat {
   font: inherit; text-align: left; cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%;
   background: transparent; color: var(--fg);
   border: 0; border-radius: 10px; padding: 9px 12px;
+  transition: background .15s ease, color .15s ease;
 }
 .cat:hover { background: var(--surface); }
 .cat[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
-.cat small { font-variant-numeric: tabular-nums; opacity: .7; }
+.cat-label { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.cat-arrow { width: 10px; height: 10px; flex: none; opacity: .75; transition: transform .15s ease; }
+.cat-group.is-open > .cat .cat-arrow { transform: rotate(90deg); }
+.cat small { font-variant-numeric: tabular-nums; opacity: .75; flex: none; }
+
+.subcats {
+  display: flex; flex-direction: column; gap: 3px;
+  margin: 2px 0 6px 14px;
+  padding-left: 10px;
+  border-left: 2px solid var(--line);
+}
+.subcat {
+  font: inherit; font-size: .925rem; text-align: left; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%;
+  background: transparent; color: var(--fg);
+  border: 0; border-radius: 8px; padding: 7px 10px;
+  transition: background .15s ease, color .15s ease;
+}
+.subcat:hover { background: var(--surface); }
+.subcat[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+.subcat small { font-variant-numeric: tabular-nums; opacity: .75; flex: none; }
 
 /* Grid */
 .grid { display: grid; gap: 24px 20px; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
-.card { display: block; color: inherit; text-decoration: none; min-width: 0; }
+.card { display: block; color: inherit; text-decoration: none; min-width: 0; cursor: pointer; }
 .thumb {
   position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden;
   box-shadow: var(--shadow); isolation: isolate;
@@ -114,9 +137,9 @@ html[lang="ru"] .wrap { --h1: clamp(2rem, 4.6vw, 3.1rem); }
   content: ""; margin-left: 4px;
   border-left: 15px solid #2a1f3d; border-top: 10px solid transparent; border-bottom: 10px solid transparent;
 }
-a.card:hover .thumb, a.card:focus-visible .thumb { transform: translateY(-4px); }
-a.card:hover .play, a.card:focus-visible .play { transform: scale(1.1); }
-a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 14px; }
+.card:hover .thumb, .card:focus-visible .thumb { transform: translateY(-4px); }
+.card:hover .play, .card:focus-visible .play { transform: scale(1.1); }
+.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 14px; }
 .card h3 {
   font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; line-height: 1.25;
   margin: 12px 2px 2px; text-wrap: balance;
@@ -125,7 +148,7 @@ a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; bo
 .card.empty { cursor: default; }
 .card.empty .play { opacity: .55; }
 
-/* Generated thumbnail tiles (shown when no thumbnail image loads) */
+/* Generated thumbnail tiles */
 .tile { background: linear-gradient(135deg, var(--a), var(--b)); }
 .tile::before, .tile::after { content: ""; position: absolute; border-radius: 50%; background: rgba(255, 255, 255, .22); }
 .tile::before { width: 46%; aspect-ratio: 1; right: -8%; top: -30%; }
@@ -146,12 +169,12 @@ a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; bo
 .pager button:hover:not(:disabled) { border-color: var(--accent); }
 .pager button[aria-current="page"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
 .pager button:disabled { opacity: .4; cursor: default; }
-.pager button:focus-visible, .cat:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.pager button:focus-visible, .cat:focus-visible, .subcat:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .none { color: var(--muted); padding: 32px 0; }
 
 [hidden] { display: none !important; }
 
-/* Video player (opens over the page) */
+/* Modal player / image lightbox */
 .player {
   position: fixed; inset: 0; z-index: 50;
   display: flex; align-items: center; justify-content: center;
@@ -168,15 +191,15 @@ a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; bo
 .player-close:hover { border-color: var(--accent); }
 .player-close:focus-visible, .player-open:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .player-frame { position: relative; aspect-ratio: 16 / 9; width: 100%; max-height: calc(100vh - 150px); background: #000; }
-/* Phones: a tall frame, so Google Drive's player has room for its controls and portrait videos. */
-@media (max-width: 700px) { .player-frame { aspect-ratio: auto; max-height: none; height: 70vh; height: min(70dvh, 150vw); } }
+.player-frame.is-image { aspect-ratio: auto; background: #140b24; display: flex; align-items: center; justify-content: center; padding: 12px; }
+@media (max-width: 700px) { .player-frame:not(.is-image) { aspect-ratio: auto; max-height: none; height: 70vh; height: min(70dvh, 150vw); } }
 .player-frame iframe,
 .player-frame video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; }
 .player-frame video { object-fit: contain; }
+.player-frame img { display: block; max-width: 100%; max-height: calc(100dvh - 175px); width: auto; height: auto; object-fit: contain; border-radius: 10px; }
 .player-open { display: block; padding: 12px 18px; font-size: .875rem; color: var(--muted); }
 
 /* Language selector */
-/* Top right corner of the page, centred on the first row of the headline (32px = page padding, 38px = button height). */
 .langbar { position: absolute; top: calc(32px + (var(--h1) - 38px) / 2); right: max(16px, env(safe-area-inset-right, 0px)); z-index: 20; }
 .lang { position: relative; }
 .lang-btn {
@@ -206,7 +229,6 @@ a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; bo
 .lang-short { display: none; }
 .count:empty { display: none; }
 
-/* Not enough room beside the headline: the dropdown moves above it. */
 @media (max-width: 1100px) {
   .langbar { position: static; display: flex; justify-content: flex-end; margin-bottom: -16px; }
 }
@@ -214,8 +236,15 @@ a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; bo
 @media (max-width: 820px) {
   .layout.has-side { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .side h2 { display: none; }
-  .cats { flex-direction: row; flex-wrap: wrap; }
-  .cat { white-space: nowrap; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
+  .cats { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .cat-group { display: contents; }
+  .cat { width: auto; white-space: nowrap; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
+  .subcats {
+    flex-direction: row; flex-wrap: wrap; width: 100%;
+    margin: 2px 0 0; padding: 8px 0 0;
+    border-left: 0; border-top: 1px solid var(--line);
+  }
+  .subcat { width: auto; white-space: nowrap; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
 }
 @media (max-width: 480px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -223,7 +252,6 @@ a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; bo
 /* Footer with contact buttons */
 .foot { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 24px; padding: 32px 0 24px; border-top: 1px solid var(--line); }
 .foot-title { margin: 0; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-/* Five buttons always stay in one row: they shrink with the screen instead of wrapping. */
 .contacts { list-style: none; margin: 0; padding: 0; width: 100%; max-width: 380px; display: flex; flex-wrap: nowrap; justify-content: center; gap: 4px clamp(4px, 2vw, 12px); }
 .contact { flex: 1 1 0; min-width: 0; max-width: 64px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .contact-btn { display: grid; place-items: center; width: 100%; max-width: 44px; aspect-ratio: 1; border-radius: 50%; transition: transform .15s ease; }
@@ -235,7 +263,6 @@ a.contact-btn[href]:hover { transform: translateY(-3px); }
 .contact .contact-btn[aria-disabled="true"] { opacity: .35; filter: grayscale(.5); box-shadow: none; }
 .contact-label { font-size: clamp(.5625rem, 2.6vw, .6875rem); color: var(--muted); text-align: center; overflow-wrap: anywhere; }
 
-/* Phone: compact dropdown in the top right corner, in the empty strip above the headline (the headline starts at 32px). */
 @media (max-width: 600px) {
   .langbar { position: absolute; display: block; margin: 0; top: 4px; right: max(16px, env(safe-area-inset-right, 0px)); }
   .lang-btn { height: 26px; padding: 0 7px; gap: 5px; font-size: .75rem; border-radius: 13px; }
@@ -293,7 +320,6 @@ a.contact-btn[href]:hover { transform: translateY(-3px); }
     </div>
   </header>
 
-
   <div class="layout" id="layout">
     <aside class="side" id="side" hidden>
       <h2 id="side-h">Категорије</h2>
@@ -304,6 +330,7 @@ a.contact-btn[href]:hover { transform: translateY(-3px); }
       <nav class="pager" id="pager" aria-label="Странице"></nav>
     </main>
   </div>
+
   <footer class="foot">
     <p class="foot-title" id="foot-title">Контакт</p>
     <ul class="contacts">
@@ -352,9 +379,10 @@ a.contact-btn[href]:hover { transform: translateY(-3px); }
       <h2 id="player-title"></h2>
       <button class="player-close" id="player-close" type="button" aria-label="Затвори">✕</button>
     </div>
-    <div class="player-frame">
+    <div class="player-frame" id="player-frame">
       <video id="player-video" controls playsinline preload="metadata" hidden></video>
       <iframe id="player-iframe" title="Видео плејер" allow="autoplay; fullscreen" allowfullscreen hidden></iframe>
+      <img id="player-image" alt="" hidden>
     </div>
     <a class="player-open" id="player-open" href="#" target="_blank" rel="noopener">Не ради? Отвори на Google Drive</a>
   </div>
@@ -364,21 +392,26 @@ a.contact-btn[href]:hover { transform: translateY(-3px); }
 /* ========= EDIT HERE ========= */
 const CONFIG = { perPage: 10 };
 
-/* Headline, subtitle and button texts for every language.
-   title: the headline, one entry per row. */
 const I18N = {
   sr: {
     flag: "flag-sr",
     docTitle: "Анимиране позивнице рођенданко",
     title: ["Анимиране позивнице", "рођенданко"],
     subtitle: "Израда статичних, анимираних и мини-игрица позивница за дечије рођендане. Могућност израде на Српском, Енглеском и Руском језику.",
-    categories: "Категорије", all: "Све",
+    categories: "Категорије",
+    catAll: "Све позивнице",
+    catAnimated: "Анимиране позивнице",
+    catStatic: "Статичне позивнице",
+    catGame: "Мини-игра позивнице",
     back: "Назад", next: "Напред",
     prevLabel: "Претходна страна", nextLabel: "Следећа страна",
     pageLabel: (n) => "Страна " + n, pagesNav: "Странице",
     pageOf: (a, b) => "Страна " + a + " од " + b,
-    empty: "У овој категорији још нема видео снимака.",
-    close: "Затвори", playerTitle: "Видео плејер", openDrive: "Не ради? Отвори на Google Drive",
+    empty: "У овој категорији још нема позивница.",
+    close: "Затвори", playerTitle: "Видео плејер",
+    openDrive: "Не ради? Отвори на Google Drive",
+    openImage: "Отвори пуну слику у новом табу",
+    openGame: "Отвори мини-игру у новом табу",
     langLabel: "Језик", names: { sr: "Српски", en: "Енглески", ru: "Руски" },
     contactTitle: "Контакт", phoneLabel: "Телефон"
   },
@@ -387,13 +420,20 @@ const I18N = {
     docTitle: "Animated Birthday Invitations",
     title: ["Animated invitations", "for birthdays"],
     subtitle: "Custom static, animated and mini-game invitations for children's birthdays. Available in Serbian, English and Russian.",
-    categories: "Categories", all: "All",
+    categories: "Categories",
+    catAll: "All invitations",
+    catAnimated: "Animated invitations",
+    catStatic: "Static invitations",
+    catGame: "Mini-game invitations",
     back: "Back", next: "Next",
     prevLabel: "Previous page", nextLabel: "Next page",
     pageLabel: (n) => "Page " + n, pagesNav: "Pages",
     pageOf: (a, b) => "Page " + a + " of " + b,
-    empty: "There are no videos in this category yet.",
-    close: "Close", playerTitle: "Video player", openDrive: "Not working? Open in Google Drive",
+    empty: "There are no invitations in this category yet.",
+    close: "Close", playerTitle: "Video player",
+    openDrive: "Not working? Open in Google Drive",
+    openImage: "Open full image in new tab",
+    openGame: "Open mini-game in new tab",
     langLabel: "Language", names: { sr: "Serbian", en: "English", ru: "Russian" },
     contactTitle: "Contact", phoneLabel: "Phone"
   },
@@ -402,28 +442,34 @@ const I18N = {
     docTitle: "Анимированные приглашения на день рождения",
     title: ["Анимированные приглашения", "на день рождения"],
     subtitle: "Создание статичных, анимированных и мини-игровых приглашений на детские дни рождения. Возможно изготовление на сербском, английском и русском языках.",
-    categories: "Категории", all: "Все",
+    categories: "Категории",
+    catAll: "Все приглашения",
+    catAnimated: "Анимированные приглашения",
+    catStatic: "Статичные приглашения",
+    catGame: "Приглашения мини-игры",
     back: "Назад", next: "Далее",
     prevLabel: "Предыдущая страница", nextLabel: "Следующая страница",
     pageLabel: (n) => "Страница " + n, pagesNav: "Страницы",
     pageOf: (a, b) => "Страница " + a + " из " + b,
-    empty: "В этой категории пока нет видео.",
-    close: "Закрыть", playerTitle: "Видеоплеер", openDrive: "Не работает? Открыть в Google Drive",
+    empty: "В этой категории пока нет приглашений.",
+    close: "Закрыть", playerTitle: "Видеоплеер",
+    openDrive: "Не работает? Открыть в Google Drive",
+    openImage: "Открыть изображение в новой вкладке",
+    openGame: "Открыть мини-игру в новой вкладке",
     langLabel: "Язык", names: { sr: "Сербский", en: "Английский", ru: "Русский" },
     contactTitle: "Контакты", phoneLabel: "Телефон"
   }
 };
 
-/* Category names in other languages. The key is the category as written in VIDEOS.
-   A category that is not listed here is shown as written. */
+/* Subcategories shown under Animated, Static and Mini-game invitations */
+const SUBCATEGORIES = ["Цртаћи", "Спорт", "Остало"];
+
 const CATEGORY_NAMES = {
   "Цртаћи": { en: "Cartoons", ru: "Мультфильмы" },
-  "Спорт": { en: "Sport", ru: "Спорт" }
+  "Спорт": { en: "Sport", ru: "Спорт" },
+  "Остало": { en: "Other", ru: "Разное" }
 };
 
-/* Contact buttons in the footer. Fill in what you want to show; a button with an empty value stays dimmed and does nothing.
-   Phone numbers: international format, e.g. "+381 60 123 4567" (without the leading 0).
-   instagram, telegram: your username (e.g. "moj_profil") or the full link to your page. */
 const CONTACTS = {
   instagram: "pozivnice_rodjendanko",
   viber: "+381645614603",
@@ -432,14 +478,13 @@ const CONTACTS = {
   telegram: "+381645614603"
 };
 
-/* One entry per video.
-   url:       Direct video link (.mp4 / Vercel Blob) or Google Drive share link.
-   title:     headline in Serbian, shown under the thumbnail.
-   en, ru:    optional headlines in English and Russian. If missing, the Serbian title is shown.
-   thumb:     optional image URL for the thumbnail. Drive links get an automatic one.
-   category:  optional. When any video has a category, the left filter sidebar appears. */
+/* Items list:
+   type:     "video" (default — Анимиране позивнице),
+             "image" (Статичне позивнице — без play иконице, увећава се на клик),
+             "game"  (Мини-игра позивнице).
+   category: "Цртаћи", "Спорт" или "Остало". */
 const VIDEOS = [
-  { title: "Bluey позивница", en: "Bluey invitation", ru: "Приглашение Bluey", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Bluey.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Bluey-okvir.png",  category: "Цртаћи" },
+  { title: "Bluey позивница", en: "Bluey invitation", ru: "Приглашение Bluey", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Bluey.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Bluey-okvir.png", category: "Цртаћи" },
   { title: "Baby Shark позивница", en: "Baby Shark invitation", ru: "Приглашение Baby Shark", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Baby%20Shark.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/868906e687d1246ee284bb8fce904a9f.jpg", category: "Цртаћи" },
   { title: "Нинџа Корњаче позивница", en: "Ninja Turtles invitation", ru: "Приглашение Черепашки-ниндзя", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Nindza%20kornjace.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Pozadina-.png", category: "Цртаћи" },
   { title: "ФК Барселона позивница", en: "FC Barcelona invitation", ru: "Приглашение ФК Барселона", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Barca%20video.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Barca.png", category: "Спорт" },
@@ -447,17 +492,30 @@ const VIDEOS = [
   { title: "ФК Интер позивница", en: "FC Inter invitation", ru: "Приглашение ФК Интер", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Inter.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Inter.png", category: "Спорт" },
   { title: "Патролне Шапе позивница", en: "Paw Patrol invitation", ru: "Приглашение Щенячий патруль", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Paw_SS.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Pozadina-sablon.png", category: "Цртаћи" },
   { title: "Нинџа Корњаче 1 позивница", en: "Ninja Turtles 1 invitation", ru: "Приглашение Черепашки-ниндзя 1", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Nindza%20kornjace%20%281%29.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Oklop-pozadina.png", category: "Цртаћи" },
-  { title: "ФК Бајерн позивница", en: "FC Bayern invitation", ru: "Приглашение ФК Бавария", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Bajern%20video.mp4", thumb:"https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Bayern.png", category: "Спорт" },
-  { title: "Принцезин замак позивница", en: "Princess castle invitation", ru: "Приглашение Замок принцессы", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Dunja.mp4", thumb:"https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Dunja.PNG", category: "Остало" },
+  { title: "ФК Бајерн позивница", en: "FC Bayern invitation", ru: "Приглашение ФК Бавария", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Bajern%20video.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Bayern.png", category: "Спорт" },
+  { title: "Принцезин замак позивница", en: "Princess castle invitation", ru: "Приглашение Замок принцессы", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Dunja.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Dunja.PNG", category: "Остало" },
   { title: "ФК Реал Мадрид позивница", en: "FC Real Madrid invitation", ru: "Приглашение ФК Реал Мадрид", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/RealM.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/RealM.png", category: "Спорт" },
-  { title: "Спајдермен позивница", en: "Spiderman invitation", ru: "Приглашение Человек-Паук", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Spiderman.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Spajdermen-pozadina.png", category: "Цртаћи" }
+  { title: "Спајдермен позивница", en: "Spiderman invitation", ru: "Приглашение Человек-Паук", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Spiderman.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Spajdermen-pozadina.png", category: "Цртаћи" },
+  { type: "image", title: "Сунђер Боб позивница", en: "SpongeBob invitation", ru: "Приглашение Губка Боб", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/sundjerbob.png", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/sundjerbob.png", category: "Цртаћи" },
+  { type: "image", title: "Фудбалска позивница", en: "Football invitation", ru: "Фудбалнаја Приглашение", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/%D0%A4%D1%83%D0%B4%D0%B1%D0%B0%D0%BB%D1%81%D0%BA%D0%B0%20%281%29.png", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/%D0%A4%D1%83%D0%B4%D0%B1%D0%B0%D0%BB%D1%81%D0%BA%D0%B0%20%281%29.png", category: "Спорт" },
+  { type: "game", title: "Једнорог мини-игра позивница", en: "Unicorn mini-game invitation", ru: "Приглашение мини-игра Единорог", url: "https://pozivnicerodjendanko.vercel.app/jednorog", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/jednorog.PNG", category: "Остало" },
+  { type: "game", title: "Дај гол! мини-игра позивница", en: "Score a goal! mini-game invitation", ru: "Приглашение мини-игра Забейте гол!", url: "https://pozivnicerodjendanko.vercel.app/daj_gol", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/dajgol.PNG", category: "Спорт" }
+
+  /* Пример за мини-игра позивницу:
+  , { type: "game", title: "Једнорог мини-игра позивница", en: "Unicorn mini-game invitation", ru: "Приглашение мини-игра Единорог", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/mini-igre/jednorog%20%281%29.html", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/igra.png", category: "Остало" }
+  */
 ];
 /* ============================= */
 
 const ALL = "*";
+const TYPE_ALL = "all";
+const TYPE_VIDEO = "video";
+const TYPE_IMAGE = "image";
+const TYPE_GAME = "game";
 const LANG_ORDER = ["sr", "en", "ru"];
 const LANG_KEY = "invitation-gallery-lang";
-const state = { page: 1, cat: ALL, lang: "sr" };
+
+const state = { page: 1, type: TYPE_ALL, cat: ALL, openType: null, lang: "sr" };
 const $ = (id) => document.getElementById(id);
 const T = () => I18N[state.lang];
 const vTitle = (v) => v[state.lang] || v.title;
@@ -470,25 +528,79 @@ function driveId(url) {
 }
 function isDirectVideo(url) {
   if (!url) return false;
-  return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url) || url.includes("blob.vercel-storage.com");
+  return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url) || url.includes("/video_pozivnice/");
+}
+function getItemType(v) {
+  if (v.type === TYPE_IMAGE || v.type === TYPE_GAME || v.type === TYPE_VIDEO) return v.type;
+  const u = (v.url || "").split("?")[0];
+  if (/\.(png|jpe?g|webp|gif)$/i.test(u) && !isDirectVideo(u)) return TYPE_IMAGE;
+  return TYPE_VIDEO;
 }
 function thumbFor(v) {
   if (v.thumb) return v.thumb;
+  if (getItemType(v) === TYPE_IMAGE && v.url) return v.url;
   const id = driveId(v.url);
   return id ? "https://drive.google.com/thumbnail?id=" + id + "&sz=w640" : "";
 }
 
 function filtered() {
-  return state.cat === ALL ? VIDEOS : VIDEOS.filter((v) => v.category === state.cat);
+  return VIDEOS.filter((v) => {
+    const typeOk = state.type === TYPE_ALL || getItemType(v) === state.type;
+    const catOk = state.cat === ALL || v.category === state.cat;
+    return typeOk && catOk;
+  });
 }
 
 let lastFocus = null;
-function openPlayer(v) {
+function openImageModal(v) {
   const vid = $("player-video");
   const frame = $("player-iframe");
+  const img = $("player-image");
+  const boxFrame = $("player-frame");
+  const imgSrc = v.url || v.thumb || "";
+
+  lastFocus = document.activeElement;
+  $("player-title").textContent = vTitle(v);
+  $("player-open").href = imgSrc || "#";
+  $("player-open").textContent = T().openImage;
+
+  vid.hidden = true;
+  vid.pause();
+  vid.removeAttribute("src");
+  vid.load();
+
+  frame.hidden = true;
+  frame.src = "about:blank";
+
+  boxFrame.classList.add("is-image");
+  img.hidden = false;
+  img.alt = vTitle(v);
+  img.src = imgSrc;
+
+  $("player").hidden = false;
+  document.body.style.overflow = "hidden";
+  $("player-close").focus();
+}
+
+function openPlayer(v) {
+  if (getItemType(v) === TYPE_IMAGE) {
+    openImageModal(v);
+    return;
+  }
+
+  const vid = $("player-video");
+  const frame = $("player-iframe");
+  const img = $("player-image");
+  const boxFrame = $("player-frame");
+
   lastFocus = document.activeElement;
   $("player-title").textContent = vTitle(v);
   $("player-open").href = v.url;
+  $("player-open").textContent = driveId(v.url) ? T().openDrive : T().openGame;
+
+  boxFrame.classList.remove("is-image");
+  img.hidden = true;
+  img.removeAttribute("src");
 
   if (isDirectVideo(v.url)) {
     frame.hidden = true;
@@ -503,16 +615,19 @@ function openPlayer(v) {
     vid.removeAttribute("src");
     vid.load();
     frame.hidden = false;
-    frame.src = "https://drive.google.com/file/d/" + id + "/preview";
+    frame.src = id ? ("https://drive.google.com/file/d/" + id + "/preview") : v.url;
   }
 
   $("player").hidden = false;
   document.body.style.overflow = "hidden";
   $("player-close").focus();
 }
+
 function closePlayer() {
   const vid = $("player-video");
   const frame = $("player-iframe");
+  const img = $("player-image");
+  const boxFrame = $("player-frame");
   $("player").hidden = true;
   vid.pause();
   vid.removeAttribute("src");
@@ -520,20 +635,32 @@ function closePlayer() {
   vid.hidden = true;
   frame.src = "about:blank";
   frame.hidden = true;
+  img.removeAttribute("src");
+  img.hidden = true;
+  boxFrame.classList.remove("is-image");
   document.body.style.overflow = "";
   if (lastFocus && lastFocus.focus) lastFocus.focus();
 }
 
 function buildCard(v, i) {
   const hasUrl = !!v.url;
+  const itemT = getItemType(v);
+  const imgCard = itemT === TYPE_IMAGE;
   const el = document.createElement(hasUrl ? "a" : "div");
   el.className = "card" + (hasUrl ? "" : " empty");
   if (hasUrl) { el.href = v.url; el.target = "_blank"; el.rel = "noopener"; }
-  if (hasUrl && (isDirectVideo(v.url) || driveId(v.url))) {
+
+  if (hasUrl) {
     el.addEventListener("click", (e) => {
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
       e.preventDefault();
-      openPlayer(v);
+      if (imgCard) {
+        openImageModal(v);
+      } else if (isDirectVideo(v.url) || driveId(v.url)) {
+        openPlayer(v);
+      } else {
+        window.open(v.url, "_blank", "noopener");
+      }
     });
   }
 
@@ -546,14 +673,20 @@ function buildCard(v, i) {
   const src = thumbFor(v);
   if (src) {
     const img = document.createElement("img");
-    img.alt = ""; img.loading = "lazy"; img.referrerPolicy = "no-referrer";
+    img.alt = imgCard ? vTitle(v) : "";
+    img.loading = "lazy";
+    img.referrerPolicy = "no-referrer";
     img.addEventListener("error", () => img.remove());
     img.src = src;
     th.appendChild(img);
   }
-  const play = document.createElement("span");
-  play.className = "play";
-  th.appendChild(play);
+
+  if (!imgCard) {
+    const play = document.createElement("span");
+    play.className = "play";
+    th.appendChild(play);
+  }
+
   el.appendChild(th);
 
   const h = document.createElement("h3");
@@ -567,25 +700,114 @@ function buildCard(v, i) {
   return el;
 }
 
+function chevronSvg() {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "cat-arrow");
+  svg.setAttribute("viewBox", "0 0 10 10");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS(NS, "path");
+  path.setAttribute("d", "M3.5 1.5L7 5l-3.5 3.5");
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "currentColor");
+  path.setAttribute("stroke-width", "1.6");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  svg.appendChild(path);
+  return svg;
+}
+
 function renderCats() {
-  const cats = [...new Set(VIDEOS.map((v) => v.category).filter(Boolean))];
+  const tx = T();
   const side = $("side");
-  const on = cats.length > 0;
-  side.hidden = !on;
-  $("layout").classList.toggle("has-side", on);
-  if (!on) return;
+  side.hidden = false;
+  $("layout").classList.add("has-side");
+
   const box = $("cats");
   box.textContent = "";
-  [ALL, ...cats].forEach((c) => {
-    const b = document.createElement("button");
-    b.className = "cat"; b.type = "button";
-    b.setAttribute("aria-pressed", String(state.cat === c));
-    const n = c === ALL ? VIDEOS.length : VIDEOS.filter((v) => v.category === c).length;
-    const label = document.createElement("span"); label.textContent = c === ALL ? T().all : catName(c);
-    const count = document.createElement("small"); count.textContent = n;
-    b.append(label, count);
-    b.addEventListener("click", () => { state.cat = c; state.page = 1; render(); });
-    box.appendChild(b);
+
+  const groups = [
+    { id: TYPE_ALL, label: tx.catAll, expandable: false },
+    { id: TYPE_VIDEO, label: tx.catAnimated, expandable: true },
+    { id: TYPE_IMAGE, label: tx.catStatic, expandable: true },
+    { id: TYPE_GAME, label: tx.catGame, expandable: true }
+  ];
+
+  groups.forEach((g) => {
+    const groupEl = document.createElement("div");
+    const isOpen = g.expandable && state.openType === g.id;
+    groupEl.className = "cat-group" + (isOpen ? " is-open" : "");
+
+    const btn = document.createElement("button");
+    btn.className = "cat";
+    btn.type = "button";
+    const isMainActive = state.type === g.id && state.cat === ALL;
+    btn.setAttribute("aria-pressed", String(isMainActive));
+    if (g.expandable) btn.setAttribute("aria-expanded", String(isOpen));
+
+    const labelWrap = document.createElement("span");
+    labelWrap.className = "cat-label";
+    if (g.expandable) labelWrap.appendChild(chevronSvg());
+    const labelTxt = document.createElement("span");
+    labelTxt.textContent = g.label;
+    labelWrap.appendChild(labelTxt);
+
+    const totalCount = g.id === TYPE_ALL
+      ? VIDEOS.length
+      : VIDEOS.filter((v) => getItemType(v) === g.id).length;
+    const countEl = document.createElement("small");
+    countEl.textContent = totalCount;
+
+    btn.append(labelWrap, countEl);
+    btn.addEventListener("click", () => {
+      if (!g.expandable) {
+        state.type = TYPE_ALL;
+        state.cat = ALL;
+        state.openType = null;
+      } else {
+        if (state.openType === g.id && state.type === g.id && state.cat === ALL) {
+          state.openType = null;
+        } else {
+          state.openType = g.id;
+          state.type = g.id;
+          state.cat = ALL;
+        }
+      }
+      state.page = 1;
+      render();
+    });
+
+    groupEl.appendChild(btn);
+
+    if (isOpen) {
+      const subWrap = document.createElement("div");
+      subWrap.className = "subcats";
+      SUBCATEGORIES.forEach((sub) => {
+        const sb = document.createElement("button");
+        sb.className = "subcat";
+        sb.type = "button";
+        const isSubActive = state.type === g.id && state.cat === sub;
+        sb.setAttribute("aria-pressed", String(isSubActive));
+
+        const sLabel = document.createElement("span");
+        sLabel.textContent = catName(sub);
+        const sCount = document.createElement("small");
+        sCount.textContent = VIDEOS.filter((v) => getItemType(v) === g.id && v.category === sub).length;
+
+        sb.append(sLabel, sCount);
+        sb.addEventListener("click", () => {
+          state.type = g.id;
+          state.openType = g.id;
+          state.cat = sub;
+          state.page = 1;
+          render();
+        });
+        subWrap.appendChild(sb);
+      });
+      groupEl.appendChild(subWrap);
+    }
+
+    box.appendChild(groupEl);
   });
 }
 
