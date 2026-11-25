@@ -170,7 +170,9 @@ a.card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; bo
 .player-frame { position: relative; aspect-ratio: 16 / 9; width: 100%; max-height: calc(100vh - 150px); background: #000; }
 /* Phones: a tall frame, so Google Drive's player has room for its controls and portrait videos. */
 @media (max-width: 700px) { .player-frame { aspect-ratio: auto; max-height: none; height: 70vh; height: min(70dvh, 150vw); } }
-.player-frame iframe { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; }
+.player-frame iframe,
+.player-frame video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; }
+.player-frame video { object-fit: contain; }
 .player-open { display: block; padding: 12px 18px; font-size: .875rem; color: var(--muted); }
 
 /* Language selector */
@@ -348,9 +350,12 @@ a.contact-btn[href]:hover { transform: translateY(-3px); }
   <div class="player-box">
     <div class="player-bar">
       <h2 id="player-title"></h2>
-      <button class="player-close" id="player-close" type="button" aria-label="Затвори">&#10005;</button>
+      <button class="player-close" id="player-close" type="button" aria-label="Затвори">✕</button>
     </div>
-    <div class="player-frame"><iframe id="player-iframe" title="Видео плејер" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
+    <div class="player-frame">
+      <video id="player-video" controls playsinline preload="metadata" hidden></video>
+      <iframe id="player-iframe" title="Видео плејер" allow="autoplay; fullscreen" allowfullscreen hidden></iframe>
+    </div>
     <a class="player-open" id="player-open" href="#" target="_blank" rel="noopener">Не ради? Отвори на Google Drive</a>
   </div>
 </div>
@@ -428,24 +433,24 @@ const CONTACTS = {
 };
 
 /* One entry per video.
-   url:       Google Drive share link (File > Share > Anyone with the link).
+   url:       Direct video link (.mp4 / Vercel Blob) or Google Drive share link.
    title:     headline in Serbian, shown under the thumbnail.
    en, ru:    optional headlines in English and Russian. If missing, the Serbian title is shown.
    thumb:     optional image URL for the thumbnail. Drive links get an automatic one.
    category:  optional. When any video has a category, the left filter sidebar appears. */
 const VIDEOS = [
-  { title: "Bluey позивница", en: "Bluey invitation", ru: "Приглашение Bluey", url: "https://drive.google.com/file/d/1lD5y_G_rlCVCj7PMkZO6DYUHHOw2rma3/view?usp=drive_link", category: "Цртаћи" },
-  { title: "Baby Shark позивница", en: "Baby Shark invitation", ru: "Приглашение Baby Shark", url: "https://drive.google.com/file/d/15kQiWFVgev-ZXIrN39gu1RkNUCqrT97V/view?usp=drive_link", category: "Цртаћи" },
-  { title: "Нинџа Корњаче позивница", en: "Ninja Turtles invitation", ru: "Приглашение Черепашки-ниндзя", url: "https://drive.google.com/file/d/1cxzNgz7ibleqk2dDmozfVkKBVdfFlntk/view?usp=drive_link", category: "Цртаћи" },
-  { title: "ФК Барселона позивница", en: "FC Barcelona invitation", ru: "Приглашение ФК Барселона", url: "https://drive.google.com/file/d/1NT94v78AobIqn0CslC32HqYBKu2bxXJM/view?usp=drive_link", category: "Спорт" },
-  { title: "Sky Патролна шапа позивница", en: "Paw Patrol Sky invitation", ru: "Приглашение Щенячий патруль: Скай", url: "https://drive.google.com/file/d/1RwWemX_t3teIcyW3iNB-rov2WMnbP5_H/view?usp=drive_link", category: "Цртаћи" },
-  { title: "ФК Интер позивница", en: "FC Inter invitation", ru: "Приглашение ФК Интер", url: "https://drive.google.com/file/d/1J9fE9FKMUPMhTX0DGogbQwSDYutm6V89/view?usp=sharing", category: "Спорт" },
-  { title: "Патролне Шапе позивница", en: "Paw Patrol invitation", ru: "Приглашение Щенячий патруль", url: "https://drive.google.com/file/d/1HfK0oyGFafpMXn42kHqHpL9FElcRM-rl/view?usp=drive_link", category: "Цртаћи" },
-  { title: "Нинџа Корњаче 1 позивница", en: "Ninja Turtles 1 invitation", ru: "Приглашение Черепашки-ниндзя 1", url: "https://drive.google.com/file/d/14SZ_AL5x_v3Tc1WwlAtm7lQuvUl32TLq/view?usp=drive_link", category: "Цртаћи" },
-  { title: "ФК Бајерн позивница", en: "FC Bayern invitation", ru: "Приглашение ФК Бавария", url: "https://drive.google.com/file/d/1ZjG2H62JE78AaEiDZwYFpA7GVkLWOFIJ/view?usp=drive_link", category: "Спорт" },
-  { title: "Принцезин замак позивница", en: "Princess castle invitation", ru: "Приглашение Замок принцессы", url: "https://drive.google.com/file/d/1YbL3ayqOsfnOhjNJKcADfOvxYX0hHoLk/view?usp=drive_link", category: "Остало" },
-  { title: "Бака Милин 70. рођендан изненађења", en: "Grandma Mila's 70th Surprise Birthday", ru: "Сюрприз на 70-летие бабушки Милы", url: "", category: "" },
-  { title: "Први рођендан близанаца", en: "The Twins' First Birthday", ru: "Первый день рождения близнецов", url: "", category: "" }
+  { title: "Bluey позивница", en: "Bluey invitation", ru: "Приглашение Bluey", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Bluey.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Bluey-okvir.png",  category: "Цртаћи" },
+  { title: "Baby Shark позивница", en: "Baby Shark invitation", ru: "Приглашение Baby Shark", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Baby%20Shark.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/868906e687d1246ee284bb8fce904a9f.jpg", category: "Цртаћи" },
+  { title: "Нинџа Корњаче позивница", en: "Ninja Turtles invitation", ru: "Приглашение Черепашки-ниндзя", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Nindza%20kornjace.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Pozadina-.png", category: "Цртаћи" },
+  { title: "ФК Барселона позивница", en: "FC Barcelona invitation", ru: "Приглашение ФК Барселона", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Barca%20video.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Barca.png", category: "Спорт" },
+  { title: "Sky Патролна шапа позивница", en: "Paw Patrol Sky invitation", ru: "Приглашение Щенячий патруль: Скай", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Sky.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/skye.PNG", category: "Цртаћи" },
+  { title: "ФК Интер позивница", en: "FC Inter invitation", ru: "Приглашение ФК Интер", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Inter.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Inter.png", category: "Спорт" },
+  { title: "Патролне Шапе позивница", en: "Paw Patrol invitation", ru: "Приглашение Щенячий патруль", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Paw_SS.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Pozadina-sablon.png", category: "Цртаћи" },
+  { title: "Нинџа Корњаче 1 позивница", en: "Ninja Turtles 1 invitation", ru: "Приглашение Черепашки-ниндзя 1", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Nindza%20kornjace%20%281%29.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Oklop-pozadina.png", category: "Цртаћи" },
+  { title: "ФК Бајерн позивница", en: "FC Bayern invitation", ru: "Приглашение ФК Бавария", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Bajern%20video.mp4", thumb:"https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Bayern.png", category: "Спорт" },
+  { title: "Принцезин замак позивница", en: "Princess castle invitation", ru: "Приглашение Замок принцессы", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Dunja.mp4", thumb:"https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Dunja.PNG", category: "Остало" },
+  { title: "ФК Реал Мадрид позивница", en: "FC Real Madrid invitation", ru: "Приглашение ФК Реал Мадрид", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/RealM.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/RealM.png", category: "Спорт" },
+  { title: "Спајдермен позивница", en: "Spiderman invitation", ru: "Приглашение Человек-Паук", url: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/video_pozivnice/Spiderman.mp4", thumb: "https://9juuqucpwthfma0j.public.blob.vercel-storage.com/slike/Spajdermen-pozadina.png", category: "Цртаћи" }
 ];
 /* ============================= */
 
@@ -463,6 +468,10 @@ function driveId(url) {
   const m = url.match(/\/d\/([\w-]+)/) || url.match(/[?&]id=([\w-]+)/);
   return m ? m[1] : "";
 }
+function isDirectVideo(url) {
+  if (!url) return false;
+  return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url) || url.includes("blob.vercel-storage.com");
+}
 function thumbFor(v) {
   if (v.thumb) return v.thumb;
   const id = driveId(v.url);
@@ -475,18 +484,42 @@ function filtered() {
 
 let lastFocus = null;
 function openPlayer(v) {
-  const id = driveId(v.url);
+  const vid = $("player-video");
+  const frame = $("player-iframe");
   lastFocus = document.activeElement;
   $("player-title").textContent = vTitle(v);
   $("player-open").href = v.url;
-  $("player-iframe").src = "https://drive.google.com/file/d/" + id + "/preview";
+
+  if (isDirectVideo(v.url)) {
+    frame.hidden = true;
+    frame.src = "about:blank";
+    vid.hidden = false;
+    vid.src = v.url;
+    vid.play().catch(() => {});
+  } else {
+    const id = driveId(v.url);
+    vid.hidden = true;
+    vid.pause();
+    vid.removeAttribute("src");
+    vid.load();
+    frame.hidden = false;
+    frame.src = "https://drive.google.com/file/d/" + id + "/preview";
+  }
+
   $("player").hidden = false;
   document.body.style.overflow = "hidden";
   $("player-close").focus();
 }
 function closePlayer() {
+  const vid = $("player-video");
+  const frame = $("player-iframe");
   $("player").hidden = true;
-  $("player-iframe").src = "about:blank";
+  vid.pause();
+  vid.removeAttribute("src");
+  vid.load();
+  vid.hidden = true;
+  frame.src = "about:blank";
+  frame.hidden = true;
   document.body.style.overflow = "";
   if (lastFocus && lastFocus.focus) lastFocus.focus();
 }
@@ -496,7 +529,7 @@ function buildCard(v, i) {
   const el = document.createElement(hasUrl ? "a" : "div");
   el.className = "card" + (hasUrl ? "" : " empty");
   if (hasUrl) { el.href = v.url; el.target = "_blank"; el.rel = "noopener"; }
-  if (hasUrl && driveId(v.url)) {
+  if (hasUrl && (isDirectVideo(v.url) || driveId(v.url))) {
     el.addEventListener("click", (e) => {
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
       e.preventDefault();
@@ -746,8 +779,5 @@ function loadLang() {
   applyLang();
 })();
 </script>
-
-
-
 
 </body></html>
