@@ -2,11 +2,13 @@
 <html lang="sr-Cyrl">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="only light">
+<meta name="supported-color-schemes" content="light">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Иванина звездана позивница</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-:root{--ink:#49305f;--pink:#f5b7d5;--purple:#9b79c8;--deep:#68458c;--cream:#fff8ff;--line:#72518f}
+:root{color-scheme:only light;--ink:#49305f;--pink:#f5b7d5;--purple:#9b79c8;--deep:#68458c;--cream:#fff8ff;--line:#72518f}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 body{min-height:100vh;display:grid;place-items:center;padding:18px;background-color:#bba5d9;background-image:radial-gradient(#ffffff70 1px,transparent 1px),linear-gradient(135deg,#bba5d9,#f2c3dc 55%,#d8b6e1);background-size:8px 8px,auto;color:var(--ink);font-family:'Press Start 2P',ui-monospace,Menlo,Consolas,'Courier New',monospace;line-height:1.5}
@@ -26,7 +28,7 @@ p{font-size:clamp(9px,1.3vw,12px);line-height:2;max-width:680px}
 .hero{display:flex;align-items:center;justify-content:center;gap:18px}.hero .unicorn{font-size:clamp(58px,10vw,90px);filter:drop-shadow(3px 3px 0 #fff)}
 .steps{display:grid;gap:12px;max-width:620px;text-align:left;background:#f8e8f6;padding:18px 22px;border:4px solid #8c6ba5;box-shadow:5px 5px 0 #62477f;width:100%}.step-row{display:grid;grid-template-columns:2em 2em minmax(0,1fr);align-items:center;column-gap:8px;font-size:clamp(8px,1.1vw,10px);line-height:2;min-width:0}.step-icon{width:2em;height:2em;display:flex;align-items:center;justify-content:center;justify-self:center;align-self:center;line-height:0}.step-star{display:block;width:1.9em;height:1.9em;overflow:visible;stroke-linejoin:round;stroke-width:1.4}.step-star.gold{fill:#ffe23b;stroke:#8b641f}.step-star.dark{fill:#21182d;stroke:#8e7a9e}.step-number{display:block;text-align:left;align-self:center;white-space:nowrap}.step-copy{min-width:0}.lives-hint{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;column-gap:8px;width:100%;margin-top:2px;font-size:clamp(8px,1.1vw,10px);line-height:2;font-weight:800;text-align:center}.hint-heart{display:flex;align-items:center;justify-content:center;font-size:1.32em;line-height:1;position:relative;top:-2px;margin:0}.hint-heart:first-child{justify-self:end}.hint-heart:last-child{justify-self:start}
 #gameScreen{padding:0;gap:0;min-height:unset;background:#c6a9dc}
-.hud{width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#d9c0e7;color:#553b76;font-size:clamp(9px,1.2vw,12px);border-bottom:4px solid #80619c}.hud #count{font-size:1.3em;display:inline-block;vertical-align:middle}.hud #lives{font-size:1.2em;letter-spacing:2px;line-height:1}
+.hud{width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#d9c0e7;color:#553b76;font-size:clamp(12px,1.6vw,16px);border-bottom:4px solid #80619c}.score{display:inline-flex;align-items:center;gap:.3em;font-size:1.9em;line-height:1;padding:.2em .45em .2em .3em;background:#fff8ff;border:3px solid #80619c;box-shadow:3px 3px 0 #62477f;transform-origin:left center}.score-star{width:1em;height:1em;fill:#ffe23b;stroke:#8b641f;stroke-width:1.4;stroke-linejoin:round;flex:none}.hud #count{font-size:1em;line-height:1;text-align:center;color:#68458c}.hud .of{font-size:1em;color:#80619c}.score.pop{animation:scorePop .45s ease-out}.score.drop{animation:scoreDrop .6s ease-out}@keyframes scorePop{0%{transform:scale(1)}35%{transform:scale(1.28);background:#fff3b0}100%{transform:scale(1)}}@keyframes scoreDrop{0%,100%{transform:translateX(0)}15%,55%{transform:translateX(-6px);background:#ffd0d8}35%,75%{transform:translateX(6px);background:#ffd0d8}}.hud #lives{font-size:1.9em;letter-spacing:2px;line-height:1;display:inline-block}.hud #lives.shake{animation:scoreDrop .6s ease-out}
 #game{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#f4c7dd;touch-action:pan-y;image-rendering:pixelated;image-rendering:crisp-edges}
 .controls{display:flex;justify-content:space-between;width:100%;padding:10px 18px;background:#d9c0e7;color:#68458c;font-size:clamp(7px,.9vw,9px);font-weight:800;border-top:4px solid #80619c}
 .actions{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;width:100%}.actions button{min-width:min(320px,90%)}
@@ -35,7 +37,7 @@ p{font-size:clamp(9px,1.3vw,12px);line-height:2;max-width:680px}
 .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .note{font-size:9px;color:#795e8e;opacity:.9}
 .intro-unicorn{display:block;width:clamp(76px,13vw,132px);height:clamp(76px,13vw,132px);object-fit:contain;flex:0 0 auto;filter:drop-shadow(2px 3px 0 #fff);image-rendering:pixelated}
-@media(max-width:560px){body{padding:8px}.screen{min-height:590px;padding:22px 16px}.steps{padding:14px;gap:10px}.step-row,.lives-hint{font-size:8px;column-gap:6px}.lives-hint{column-gap:8px}.hud{font-size:9px}.hud #count{font-size:1.3em}.hud #lives{font-size:1.2em}.controls{font-size:7px}.hero{gap:8px}.hero h1{font-size:clamp(10px,2.8vw,16px)}.intro-unicorn{width:clamp(64px,19vw,100px);height:clamp(64px,19vw,100px}.ticket{padding:16px 12px}.ticket-details{width:100%}.ticket-row{font-size:8px;gap:6px}.ticket-title{font-size:12px}.ticket h2{font-size:8px}}
+@media(max-width:560px){body{padding:8px}.screen{min-height:590px;padding:22px 16px}.steps{padding:14px;gap:10px}.step-row,.lives-hint{font-size:8px;column-gap:6px}.lives-hint{column-gap:8px}.hud{font-size:11px;padding:8px 10px}.hud #lives{font-size:1.7em;letter-spacing:0}.hud .score{font-size:1.7em}.controls{font-size:7px}.hero{gap:8px}.hero h1{font-size:clamp(10px,2.8vw,16px)}.intro-unicorn{width:clamp(64px,19vw,100px);height:clamp(64px,19vw,100px}.ticket{padding:16px 12px}.ticket-details{width:100%}.ticket-row{font-size:8px;gap:6px}.ticket-title{font-size:12px}.ticket h2{font-size:8px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto;transition:none!important}}
 </style>
 </head>
@@ -64,7 +66,7 @@ p{font-size:clamp(9px,1.3vw,12px);line-height:2;max-width:680px}
   <button id="start">Започни игру</button>
  </section>
  <section class="screen" id="gameScreen" hidden>
-  <div class="hud"><span>🌟 <span id="count">0</span> / 10</span><span id="lives">❤️❤️❤️</span></div>
+  <div class="hud"><span class="score" id="score"><svg class="score-star" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12.00,2.60 14.59,9.64 22.08,9.92 16.18,14.56 18.23,21.78 12.00,17.60 5.77,21.78 7.82,14.56 1.92,9.92 9.41,9.64"/></svg><span id="count">0</span><span class="of">/ 10</span></span><span id="lives">❤️❤️❤️</span></div>
   <canvas id="game" width="320" height="180" aria-label="Игра сакупљања звездица"></canvas>
   <div class="controls"><span>◀ ДОДИРНИ ЛЕВО</span><span>ДОДИРНИ ДЕСНО ▶</span></div>
  </section>
@@ -118,9 +120,9 @@ $("start").onclick=()=>{audioStart();begin()};
 $("againWin").onclick=$("againLose").onclick=()=>{show("gameScreen");begin()};
 $("openTicket").onclick=()=>show("ticket");$("backWin").onclick=()=>show("win");
 
-const canvas=$("game"),ctx=canvas.getContext("2d");ctx.scale(0.4,0.4);let running=false,raf=0,playerX=400,stars=[],count=0,lives=3,last=0,spawn=0,particles=[],move=0,ending=null,unicornPose=null;window.unicornFacing=1;
-function reset(){playerX=400;window.unicornFacing=1;stars=[];count=0;lives=3;last=0;spawn=.5;particles=[];move=0;ending=null;updateHud()}
-function updateHud(){$("count").textContent=count;$("lives").textContent="❤️".repeat(lives)+"🖤".repeat(3-lives)}
+const canvas=$("game"),ctx=canvas.getContext("2d");ctx.scale(0.4,0.4);let running=false,raf=0,playerX=400,stars=[],count=0,lives=3,last=0,spawn=0,particles=[],move=0,ending=null,unicornPose=null,holdDir=0;window.unicornFacing=1;
+function reset(){playerX=400;window.unicornFacing=1;stars=[];count=0;lives=3;last=0;spawn=.5;particles=[];move=0;holdDir=0;ending=null;updateHud()}
+let prevCount=0;function updateHud(){const sc=$("score");if(sc){const cls=count>prevCount?"pop":(count<prevCount?"drop":"");if(cls){sc.classList.remove("pop","drop");void sc.offsetWidth;sc.classList.add(cls)}}prevCount=count;$("count").textContent=count;$("lives").textContent="❤️".repeat(lives)+"🖤".repeat(3-lives)}
 function begin(){cancelAnimationFrame(raf);reset();running=true;show("gameScreen");raf=requestAnimationFrame(loop)}
 function starPath(x,y,r){
  // Chunky 5-point star silhouette, drawn on the pixel grid.
@@ -186,8 +188,9 @@ function drawUnicorn(x,y,t){
  }
  ctx.restore();
 }
-const END_DUR={win:1.9,lose:2.3};
-function startEnd(type){ending={type,t:0,n:0};stars=[];move=0;if(type==="win"){window.unicornFacing=1;burst(playerX,350)}}
+const END_DUR={win:1.9,lose:2.3,hurt:1.5};
+function sadSound(){if(!soundOn||!audioCtx)return;try{audioCtx.resume();const t0=audioCtx.currentTime;[[392,0],[330,.2],[277,.4],[208,.6]].forEach(([f,d],i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="triangle";o.frequency.setValueAtTime(f,t0+d);if(i===3)o.frequency.exponentialRampToValueAtTime(f*.8,t0+d+.5);g.gain.setValueAtTime(.0001,t0+d);g.gain.exponentialRampToValueAtTime(.16,t0+d+.03);g.gain.exponentialRampToValueAtTime(.0001,t0+d+(i===3?.55:.19));o.connect(g);g.connect(audioCtx.destination);o.start(t0+d);o.stop(t0+d+.6)})}catch(err){}}
+function startEnd(type){ending={type,t:0,n:0};stars=[];move=0;if(type==="win"){window.unicornFacing=1;burst(playerX,350)}else{sadSound();const l=$("lives");l.classList.remove("shake");void l.offsetWidth;l.classList.add("shake")}}
 function endStep(ts,dt){
  const e=ending;e.t+=dt;const t=e.t;
  background(ts/1000);
@@ -207,16 +210,25 @@ function endStep(ts,dt){
   drawUnicorn(px,350,ts/1000);
   ctx.filter="none";unicornPose=null;
   const cl=Math.min(1,t/.4);ctx.globalAlpha=cl;
-  const cx=Math.round(px/8)*8-40,cy=190;
+  const cx=Math.round(px/8)*8-40,cy=206;
   pixelRect(cx,cy,88,16,"#7d7a9a");pixelRect(cx+16,cy-16,56,16,"#8f8cab");pixelRect(cx+8,cy+8,72,16,"#6c6988");
   ctx.fillStyle="#7fb6ff";
   for(let i=0;i<7;i++){const ry=((t*170+i*37)%110);ctx.fillRect(cx+8+i*11,cy+28+ry,4,10)}
   // tears from the eye
   const kk=150/463,w=517*kk,x0=px-w/2,y0=350-75,ex=facingLeft?517-410:410;
   for(let i=0;i<2;i++){const f=((t*1.6+i*.5)%1);ctx.fillRect(x0+ex*kk-2+(facingLeft?-1:1)*f*3,y0+165*kk+f*46,5,8)}
+  if(e.type==="hurt"){ // info: lost a heart and the star count starts again
+   ctx.globalAlpha=Math.min(1,t/.25);ctx.textAlign="center";ctx.textBaseline="middle";
+   ctx.font="bold 34px 'Press Start 2P',monospace";ctx.lineWidth=8;ctx.strokeStyle="#fff8ff";ctx.fillStyle="#d6336c";
+   const ty=128-Math.min(t,.6)*30;ctx.strokeText("-1 ❤",px,ty);ctx.fillText("-1 ❤",px,ty);
+   ctx.font="bold 22px 'Press Start 2P',monospace";ctx.lineWidth=6;ctx.fillStyle="#68458c";
+   ctx.strokeText("⭐ 0",px,ty+42);ctx.fillText("⭐ 0",px,ty+42);
+  }
   ctx.globalAlpha=1;
  }
- if(t>=END_DUR[e.type]){ending=null;running=false;if(e.type==="win"){show("win");confetti()}else show("lose");return}
+ if(t>=END_DUR[e.type]){
+  if(e.type==="hurt"){ending=null;playerX=400;window.unicornFacing=1;stars=[];spawn=1.1;move=0;last=ts;raf=requestAnimationFrame(loop);return}
+  ending=null;running=false;if(e.type==="win"){show("win");confetti()}else show("lose");return}
  raf=requestAnimationFrame(loop)
 }
 function pixelRect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x/8)*8,Math.round(y/8)*8,Math.ceil(w/8)*8,Math.ceil(h/8)*8)}
@@ -235,14 +247,14 @@ function background(t){
 }
 function spawnStar(){stars.push({x:45+Math.random()*710,y:-25,vy:125+Math.random()*75,bad:Math.random()<.27,r:15,rot:0})}
 function burst(x,y){for(let i=0;i<18;i++)particles.push({x,y,vx:(Math.random()-.5)*190,vy:(Math.random()-.7)*180,life:1,color:["#ffe16a","#ff83bf","#a88ce6","#fff"][i%4]})}
-function loop(ts){if(!running)return;let dt=Math.min(.035,(ts-last)/1000||0);last=ts;if(ending){endStep(ts,dt);return}move*=.88;if(move<-.01)window.unicornFacing=-1;else if(move>.01)window.unicornFacing=1;playerX=Math.max(60,Math.min(740,playerX+move*dt*260));spawn-=dt;if(spawn<=0){spawnStar();spawn= .68+Math.random()*.42}
+function loop(ts){if(!running)return;let dt=Math.min(.035,(ts-last)/1000||0);last=ts;if(ending){endStep(ts,dt);return}if(holdDir)move=holdDir;else move*=.88;if(move<-.01)window.unicornFacing=-1;else if(move>.01)window.unicornFacing=1;playerX=Math.max(60,Math.min(740,playerX+move*dt*312));spawn-=dt;if(spawn<=0){spawnStar();spawn= .68+Math.random()*.42}
  background(ts/1000);stars.forEach(s=>{s.y+=s.vy*dt;s.rot+=dt*2;ctx.save();ctx.translate(Math.round(s.x/4)*4,Math.round(s.y/4)*4);starPath(0,0,s.r);ctx.fillStyle=s.bad?"#29243b":"#ffd64f";ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=s.bad?"#100f1c":"#fff2a5";ctx.stroke();ctx.fillStyle=s.bad?"#5c526d":"#fff4a8";ctx.fillRect(-3,-18,4,4);ctx.restore();
- if(!ending&&Math.abs(s.x-playerX)<58 && Math.abs(s.y-350)<62){s.hit=true;if(s.bad){lives--;count=0;updateHud();burst(playerX,350);stars=[];if(lives<=0){startEnd("lose");return}playerX=400;window.unicornFacing=1;spawn=1.1;return}else{count=Math.min(10,count+1);updateHud();burst(s.x,s.y);if(count>=10){burst(playerX,350);startEnd("win");return}}}});
+ if(!ending&&Math.abs(s.x-playerX)<58 && Math.abs(s.y-350)<62){s.hit=true;if(s.bad){lives--;count=0;updateHud();burst(playerX,350);stars=[];startEnd(lives<=0?"lose":"hurt");return}else{count=Math.min(10,count+1);updateHud();burst(s.x,s.y);if(count>=10){burst(playerX,350);startEnd("win");return}}}});
  stars=stars.filter(s=>s.y<480&&!s.hit);
  particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=190*dt;p.life-=dt;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,6,6)});ctx.globalAlpha=1;particles=particles.filter(p=>p.life>0);
  drawUnicorn(playerX,350,ts/1000);raf=requestAnimationFrame(loop)}
-function steer(e){if(ending)return;const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width;move=x<.5?-1:1;window.unicornFacing=move<0?-1:1}
-canvas.addEventListener("pointerdown",e=>{steer(e);canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointerup",()=>move=0);canvas.addEventListener("pointercancel",()=>move=0);
+function steer(e,nudge){if(ending)return;const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width;move=holdDir=x<.5?-1:1;window.unicornFacing=move<0?-1:1;if(nudge)playerX=Math.max(60,Math.min(740,playerX+move*36))}
+canvas.addEventListener("pointerdown",e=>{steer(e,true);canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointermove",e=>{if(holdDir)steer(e)});canvas.addEventListener("pointerup",()=>{holdDir=0;move=0});canvas.addEventListener("pointercancel",()=>{holdDir=0;move=0});
 window.addEventListener("keydown",e=>{if(ending)return;if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a"){window.unicornFacing=-1;playerX=Math.max(70,playerX-35)}if(e.key==="ArrowRight"||e.key.toLowerCase()==="d"){window.unicornFacing=1;playerX=Math.min(730,playerX+35)}});
 
 function confetti(){const box=$("confetti");box.innerHTML="";for(let i=0;i<65;i++){let el=document.createElement("i");el.style.cssText=`position:absolute;left:${Math.random()*100}%;top:-15px;width:8px;height:8px;background:${["#ff83bf","#ffe16a","#9d84d2","#83d9c2"][i%4]};transform:rotate(${Math.random()*90}deg);image-rendering:pixelated;animation:fall ${2+Math.random()*3}s linear ${Math.random()*1.5}s infinite`;box.append(el)}}
